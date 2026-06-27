@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高考志愿填报助手 - 山东503分</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script>
+    // ECharts 5.x 不再内置地图，需通过 registerMap 注册中国地图 GeoJSON
+    fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+      .then(res => res.json())
+      .then(geoJson => {
+        echarts.registerMap('china', geoJson);
+        document.dispatchEvent(new Event('map-ready'));
+      })
+      .catch(err => console.error('Failed to load China map GeoJSON:', err));
+  </script>
+</head>
+<body>
+  <!-- 顶部控制栏 -->
+  <header id="header">
+    <h1>🎓 高考志愿填报助手</h1>
+    <div id="controls">
+      <div class="control-group">
+        <label>省份</label>
+        <select id="user-province">
+          <option value="山东" selected>山东</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>分数</label>
+        <input type="number" id="user-score" value="503" min="100" max="750">
+      </div>
+      <div class="control-group">
+        <label>科类</label>
+        <select id="user-category">
+          <option value="综合改革" selected>综合改革</option>
+          <option value="理科">理科</option>
+          <option value="文科">文科</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>批次</label>
+        <select id="user-batch">
+          <option value="本科一批" selected>本科一批</option>
+          <option value="本科二批">本科二批</option>
+        </select>
+      </div>
+      <button id="analyze-btn">🔍 分析</button>
+    </div>
+  </header>
+
+  <!-- 主体区域 -->
+  <main id="main">
+    <!-- 左侧地图 -->
+    <section id="map-panel">
+      <div id="china-map"></div>
+      <div id="map-legend">
+        <span class="legend-item"><span class="dot green"></span> 保底 (>70%)</span>
+        <span class="legend-item"><span class="dot yellow"></span> 稳妥 (40-70%)</span>
+        <span class="legend-item"><span class="dot red"></span> 冲刺 (<40%)</span>
+      </div>
+    </section>
+
+    <!-- 右侧结果面板 -->
+    <aside id="result-panel">
+      <div id="result-empty">
+        <p class="placeholder-text">👈 点击地图上的省份查看详情</p>
+        <p class="placeholder-hint">或点击「分析」按钮开始</p>
+      </div>
+      <div id="result-content" style="display:none;">
+        <div id="result-header">
+          <h2 id="result-province-name"></h2>
+          <div class="filter-bar">
+            <button class="filter-btn active" data-level="all">全部</button>
+            <button class="filter-btn" data-level="保底">🟢 保底</button>
+            <button class="filter-btn" data-level="稳妥">🟡 稳妥</button>
+            <button class="filter-btn" data-level="冲刺">🔴 冲刺</button>
+          </div>
+        </div>
+        <div id="school-list"></div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- 脚本：顺序加载 data → predict → app -->
+  <script src="js/data.js"></script>
+  <script src="js/predict.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
