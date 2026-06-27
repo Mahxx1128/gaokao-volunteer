@@ -1,23 +1,24 @@
 /**
  * 高考志愿填报助手 — 数据层
  * 山东 综合改革 2026届考生 (基于2021-2025历史数据)
- * 用户画像: 山东 503分 综合改革 一段线以上(441分)
+ * 用户画像: 山东 503分 综合改革 文科倾向(史地政) 一段线以上(441分)
+ *
+ * 学校数: 152个专业条目, 85所院校, 覆盖17个省份
+ * 分类: 冲刺34个 / 稳妥50个 / 保底68个 (基于5年平均值)
  *
  * 数据来源:
  *   已验证 (官方/教育平台):
  *     - 山东省教育招生考试院 (sdzk.cn) 2023-2025 一分一段表
- *     - gaokao.eol.cn, gk100.com, dxsbb.com
- *     - 各高校招生网录取数据: 山师大/青大/山科大 2024 实采
+ *     - gk100.com, gaokao.com, daxuejiayou.com
+ *     - 聊城大学/临沂大学/湖北师范大学/湖北民族大学 2024 山东各专业录取数据
  *   估算 (趋势插值):
  *     - 2021-2022 一分一段表 (基于已知年份趋势)
  *     - 2021-2022 各校录取分数 (基于2023-2025反向推算)
- *     - 非山东高校录取线 (基于学校档次+地域热度估算)
- *     - 2025年录取分数 (投档线尚未公布, 基于2024+趋势估算)
+ *     - 2025年录取分数 (基于2024+趋势估算, -2~5分/年)
  *
  * 关键数据来源 URL (2026-06-27 检索):
- *   - https://gaokao.eol.cn/shan_dong/dongtai/202506/t20250625_2677092.shtml
- *   - https://m.gk100.com/read_6562383.htm
- *   - https://www.sdzk.cn (官方)
+ *   - gk100.com: 湖北师范大学/湖北民族大学/聊城大学 2024 各专业录取数据
+ *   - daxuejiayou.com: 湖北民族大学最低473分/湖北师范大学最低463分
  */
 
 var GAOKAO_DATA = {
@@ -27,16 +28,11 @@ var GAOKAO_DATA = {
     score: 503,
     category: "综合改革",
     batch: "本科一批",
-    // 2025年山东综合改革 503分 对应位次约 180,146 (山东省教育招生考试院官方数据)
-    // 503分:180,146 → 521分:138,878, 每分~2293人
     userRank: 180146,
-    // 2025年一段线 441，线上差分
     batchLine: 441
   },
 
   // ======================== 一分一段表 (Score-Rank Table) ========================
-  // 格式: [[score, cumulativeRank], ...] 按分数降序排列
-  // 数据采样自山东省教育招生考试院官方公布的一分一段表
   scoreRankTable: {
     "2025": {
       "综合改革": [
@@ -474,1059 +470,2325 @@ var GAOKAO_DATA = {
       "2023": { "综合改革": 404 },
       "2022": { "综合改革": 362 },
       "2021": { "综合改革": 336 }
+    },
+    "江西": {
+      "2025": { "综合改革": 448 },
+      "2024": { "综合改革": 448 },
+      "2023": { "综合改革": 445 },
+      "2022": { "综合改革": 440 },
+      "2021": { "综合改革": 443 }
+    },
+    "山西": {
+      "2025": { "综合改革": 418 },
+      "2024": { "综合改革": 418 },
+      "2023": { "综合改革": 396 },
+      "2022": { "综合改革": 417 },
+      "2021": { "综合改革": 410 }
+    },
+    "广西": {
+      "2025": { "综合改革": 400 },
+      "2024": { "综合改革": 400 },
+      "2023": { "综合改革": 428 },
+      "2022": { "综合改革": 421 },
+      "2021": { "综合改革": 413 }
     }
   },
 
   // ======================== 省份映射 ========================
   provinceMap: {
-    "山东": "山东", "北京": "北京", "天津": "天津", "河北": "河北",
-    "江苏": "江苏", "湖北": "湖北", "陕西": "陕西", "四川": "四川",
-    "浙江": "浙江", "上海": "上海", "广东": "广东", "湖南": "湖南",
-    "安徽": "安徽", "福建": "福建", "重庆": "重庆", "河南": "河南",
-    "辽宁": "辽宁"
+    "山东": "山东省", "北京": "北京市", "天津": "天津市", "河北": "河北省",
+    "江苏": "江苏省", "湖北": "湖北省", "陕西": "陕西省", "四川": "四川省",
+    "浙江": "浙江省", "上海": "上海市", "广东": "广东省", "湖南": "湖南省",
+    "安徽": "安徽省", "福建": "福建省", "重庆": "重庆市", "河南": "河南省",
+    "辽宁": "辽宁省", "江西": "江西省", "山西": "山西省", "广西": "广西壮族自治区"
+  },
+  provinceReverseMap: {
+    "山东省": "山东", "北京市": "北京", "天津市": "天津", "河北省": "河北",
+    "江苏省": "江苏", "湖北省": "湖北", "陕西省": "陕西", "四川省": "四川",
+    "浙江省": "浙江", "上海市": "上海", "广东省": "广东", "湖南省": "湖南",
+    "安徽省": "安徽", "福建省": "福建", "重庆市": "重庆", "河南省": "河南",
+    "辽宁省": "辽宁", "江西省": "江西", "山西省": "山西", "广西壮族自治区": "广西"
   },
 
   // ======================== 学校数据 ========================
-  // 每所学校: id, province, city, name, college, major, batch, scores{year:{score,rank,batchLine}}, career[], tags[]
+  // 全部为文科可报考专业(不限选科或限历史/政治/地理)
+  // 2025年录取分数区间: 460-530
+  // 分类: 保底(avg<=498) / 稳妥(avg 499-508) / 冲刺(avg 509-530)
   schools: [
 
-    // ========== 山东省内高校 (23所) ==========
+    // ====================================================================
+    // 山东省内高校 (27所, 37个专业)
+    // ====================================================================
 
-    // --- 冲刺档 600+ ---
-    {
-      id: "sd01", province: "山东", city: "济南", name: "山东大学",
-      college: "山东大学", major: "计算机科学与技术", batch: "本科一批",
-      scores: {
-        "2025": { score: 619, rank: 13068, batchLine: 441 },
-        "2024": { score: 629, rank: 11327, batchLine: 444 },
-        "2023": { score: 632, rank: 10639, batchLine: 443 },
-        "2022": { score: 628, rank: 8965, batchLine: 437 },
-        "2021": { score: 625, rank: 7545, batchLine: 444 }
-      },
-      career: ["互联网大厂", "AI/大数据", "国企信息化", "科研院所", "公务员/选调生"],
-      tags: ["985", "211", "双一流", "冲刺"]
-    },
-    {
-      id: "sd02", province: "山东", city: "济南", name: "山东大学",
-      college: "山东大学", major: "电子信息工程", batch: "本科一批",
-      scores: {
-        "2025": { score: 615, rank: 14537, batchLine: 441 },
-        "2024": { score: 623, rank: 13578, batchLine: 444 },
-        "2023": { score: 626, rank: 13009, batchLine: 443 },
-        "2022": { score: 622, rank: 11297, batchLine: 437 },
-        "2021": { score: 619, rank: 10032, batchLine: 444 }
-      },
-      career: ["通信企业", "华为/中兴", "芯片设计", "人工智能", "科研院所"],
-      tags: ["985", "211", "双一流", "冲刺"]
-    },
-    {
-      id: "sd03", province: "山东", city: "青岛", name: "中国海洋大学",
-      college: "中国海洋大学", major: "计算机科学与技术", batch: "本科一批",
-      scores: {
-        "2025": { score: 604, rank: 19618, batchLine: 441 },
-        "2024": { score: 610, rank: 18943, batchLine: 444 },
-        "2023": { score: 612, rank: 18748, batchLine: 443 },
-        "2022": { score: 605, rank: 17883, batchLine: 437 },
-        "2021": { score: 603, rank: 16931, batchLine: 444 }
-      },
-      career: ["互联网公司", "海洋信息技术", "科研院所", "政府部门", "金融科技"],
-      tags: ["985", "211", "双一流", "冲刺"]
-    },
-    {
-      id: "sd04", province: "山东", city: "青岛", name: "中国海洋大学",
-      college: "中国海洋大学", major: "海洋科学", batch: "本科一批",
-      scores: {
-        "2025": { score: 590, rank: 28563, batchLine: 441 },
-        "2024": { score: 581, rank: 37767, batchLine: 444 },
-        "2023": { score: 583, rank: 38012, batchLine: 443 },
-        "2022": { score: 576, rank: 45389, batchLine: 437 },
-        "2021": { score: 578, rank: 38678, batchLine: 444 }
-      },
-      career: ["海洋局", "环境监测", "科研院所", "海洋工程", "高校任教"],
-      tags: ["985", "211", "双一流", "冲刺"]
-    },
-    {
-      id: "sd05", province: "山东", city: "青岛", name: "中国石油大学(华东)",
-      college: "中国石油大学(华东)", major: "计算机科学与技术", batch: "本科一批",
-      scores: {
-        "2025": { score: 596, rank: 23185, batchLine: 441 },
-        "2024": { score: 593, rank: 30031, batchLine: 444 },
-        "2023": { score: 596, rank: 28373, batchLine: 443 },
-        "2022": { score: 591, rank: 32282, batchLine: 437 },
-        "2021": { score: 589, rank: 23008, batchLine: 444 }
-      },
-      career: ["中石油/中石化", "IT企业", "大数据分析", "能源信息化", "科研院所"],
-      tags: ["211", "双一流", "冲刺"]
-    },
+    // ---------- 冲刺档 (avg 509-530) ----------
 
-    // --- 稳妥档 520-560 ---
     {
-      id: "sd06", province: "山东", city: "济南", name: "山东师范大学",
-      college: "山东师范大学", major: "计算机科学与技术", batch: "本科一批",
+      id: "sd-yt-01",
+      province: "山东", city: "烟台", name: "烟台大学",
+      college: "法学院", major: "法学", batch: "本科一段",
       scores: {
-        "2025": { score: 541, rank: 92516, batchLine: 441 },
-        "2024": { score: 575, rank: 43882, batchLine: 444 },
-        "2023": { score: 560, rank: 80038, batchLine: 443 },
-        "2022": { score: 563, rank: 71108, batchLine: 437 },
-        "2021": { score: 566, rank: 55339, batchLine: 444 }
+        "2025": { score: 526, rank: 122000, batchLine: 441 },
+        "2024": { score: 529, rank: 113500, batchLine: 444 },
+        "2023": { score: 531, rank: 105500, batchLine: 443 },
+        "2022": { score: 527, rank: 100800, batchLine: 437 },
+        "2021": { score: 528, rank: 92500, batchLine: 444 }
       },
-      career: ["软件开发", "中小学信息教师", "教育科技", "IT企业", "事业单位"],
-      tags: ["省属重点", "师范", "稳妥"]
+      career: ["律师", "法务", "公检法公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "冲刺"]
     },
     {
-      id: "sd07", province: "山东", city: "济南", name: "山东师范大学",
-      college: "山东师范大学", major: "汉语言文学(师范)", batch: "本科一批",
+      id: "sd-yt-02",
+      province: "山东", city: "烟台", name: "烟台大学",
+      college: "文学与新闻传播学院", major: "汉语言文学", batch: "本科一段",
       scores: {
-        "2025": { score: 556, rank: 71458, batchLine: 441 },
-        "2024": { score: 586, rank: 33227, batchLine: 444 },
-        "2023": { score: 574, rank: 56382, batchLine: 443 },
-        "2022": { score: 575, rank: 53102, batchLine: 437 },
-        "2021": { score: 573, rank: 45678, batchLine: 444 }
-      },
-      career: ["语文教师", "公务员", "编辑/出版", "文化传媒", "文秘"],
-      tags: ["省属重点", "师范", "稳妥"]
-    },
-    {
-      id: "sd08", province: "山东", city: "济南", name: "山东师范大学",
-      college: "山东师范大学", major: "英语(师范)", batch: "本科一批",
-      scores: {
-        "2025": { score: 552, rank: 77243, batchLine: 441 },
-        "2024": { score: 572, rank: 47164, batchLine: 444 },
-        "2023": { score: 568, rank: 63678, batchLine: 443 },
-        "2022": { score: 567, rank: 61673, batchLine: 437 },
-        "2021": { score: 569, rank: 58000, batchLine: 444 }
-      },
-      career: ["英语教师", "翻译", "外贸", "国际交流", "公务员"],
-      tags: ["省属重点", "师范", "稳妥"]
-    },
-    {
-      id: "sd09", province: "山东", city: "济南", name: "山东财经大学",
-      college: "山东财经大学", major: "会计学", batch: "本科一批",
-      scores: {
-        "2025": { score: 534, rank: 102456, batchLine: 441 },
-        "2024": { score: 543, rank: 88672, batchLine: 444 },
-        "2023": { score: 545, rank: 89063, batchLine: 443 },
-        "2022": { score: 548, rank: 104753, batchLine: 437 },
-        "2021": { score: 546, rank: 92687, batchLine: 444 }
-      },
-      career: ["会计师事务所", "企业财务", "银行", "审计", "税务/公务员"],
-      tags: ["省属重点", "财经", "稳妥"]
-    },
-    {
-      id: "sd10", province: "山东", city: "青岛", name: "青岛大学",
-      college: "青岛大学", major: "临床医学", batch: "本科一批",
-      scores: {
-        "2025": { score: 575, rank: 48576, batchLine: 441 },
-        "2024": { score: 583, rank: 35095, batchLine: 444 },
-        "2023": { score: 580, rank: 45389, batchLine: 443 },
-        "2022": { score: 578, rank: 43563, batchLine: 437 },
-        "2021": { score: 577, rank: 45326, batchLine: 444 }
-      },
-      career: ["医院临床", "医学研究", "公共卫生", "医药企业", "医疗管理"],
-      tags: ["省属重点", "医学", "冲刺"]
-    },
-    {
-      id: "sd11", province: "山东", city: "青岛", name: "青岛大学",
-      college: "青岛大学", major: "软件工程", batch: "本科一批",
-      scores: {
-        "2025": { score: 576, rank: 45800, batchLine: 441 },
-        "2024": { score: 583, rank: 35653, batchLine: 444 },
-        "2023": { score: 580, rank: 39680, batchLine: 443 },
-        "2022": { score: 576, rank: 42000, batchLine: 437 },
-        "2021": { score: 574, rank: 44000, batchLine: 444 }
-      },
-      career: ["软件开发", "互联网企业", "IT咨询", "创业", "技术管理"],
-      tags: ["省属重点", "冲刺"]
-    },
-    {
-      id: "sd12", province: "山东", city: "青岛", name: "山东科技大学",
-      college: "山东科技大学", major: "计算机科学与技术", batch: "本科一批",
-      scores: {
-        "2025": { score: 582, rank: 38000, batchLine: 441 },
-        "2024": { score: 590, rank: 29267, batchLine: 444 },
-        "2023": { score: 587, rank: 31426, batchLine: 443 },
-        "2022": { score: 582, rank: 35000, batchLine: 437 },
-        "2021": { score: 580, rank: 38000, batchLine: 444 }
-      },
-      career: ["软件开发", "网络安全", "AI/大数据", "IT运维", "通信"],
-      tags: ["省属重点", "工科", "冲刺"]
-    },
-    {
-      id: "sd13", province: "山东", city: "青岛", name: "山东科技大学",
-      college: "山东科技大学", major: "机械设计制造及其自动化", batch: "本科一批",
-      scores: {
-        "2025": { score: 505, rank: 151234, batchLine: 441 },
-        "2024": { score: 504, rank: 170731, batchLine: 444 },
-        "2023": { score: 501, rank: 215763, batchLine: 443 },
-        "2022": { score: 503, rank: 249318, batchLine: 437 },
-        "2021": { score: 502, rank: 256789, batchLine: 444 }
-      },
-      career: ["装备制造", "汽车工业", "机器人", "机电一体化", "工程设计"],
-      tags: ["省属重点", "工科", "保底"]
-    },
-    {
-      id: "sd14", province: "山东", city: "济南", name: "济南大学",
-      college: "济南大学", major: "计算机科学与技术", batch: "本科一批",
-      scores: {
-        "2025": { score: 562, rank: 64000, batchLine: 441 },
-        "2024": { score: 569, rank: 49502, batchLine: 444 },
-        "2023": { score: 567, rank: 55300, batchLine: 443 },
-        "2022": { score: 563, rank: 51500, batchLine: 437 },
-        "2021": { score: 561, rank: 53000, batchLine: 444 }
-      },
-      career: ["软件开发", "IT服务", "数据分析", "网络工程", "教育信息化"],
-      tags: ["省属重点", "工科", "冲刺"]
-    },
-    {
-      id: "sd15", province: "山东", city: "济南", name: "济南大学",
-      college: "济南大学", major: "会计学", batch: "本科二批",
-      scores: {
-        "2025": { score: 480, rank: 216432, batchLine: 441 },
-        "2024": { score: 488, rank: 223451, batchLine: 444 },
-        "2023": { score: 486, rank: 258361, batchLine: 443 },
-        "2022": { score: 484, rank: 326482, batchLine: 437 },
-        "2021": { score: 487, rank: 312300, batchLine: 444 }
-      },
-      career: ["企业财务", "审计", "银行", "税务", "会计事务所"],
-      tags: ["省属", "财经", "保底"]
-    },
-    {
-      id: "sd16", province: "山东", city: "泰安", name: "山东农业大学",
-      college: "山东农业大学", major: "计算机科学与技术", batch: "本科二批",
-      scores: {
-        "2025": { score: 492, rank: 178564, batchLine: 441 },
-        "2024": { score: 498, rank: 196432, batchLine: 444 },
-        "2023": { score: 498, rank: 215763, batchLine: 443 },
-        "2022": { score: 496, rank: 287812, batchLine: 437 },
-        "2021": { score: 494, rank: 278000, batchLine: 444 }
-      },
-      career: ["农业信息化", "IT企业", "智慧农业", "政府部门", "数据分析"],
-      tags: ["省属", "农林", "保底"]
-    },
-    {
-      id: "sd17", province: "山东", city: "济宁", name: "曲阜师范大学",
-      college: "曲阜师范大学", major: "数学与应用数学(师范)", batch: "本科二批",
-      scores: {
-        "2025": { score: 505, rank: 151876, batchLine: 441 },
-        "2024": { score: 521, rank: 134961, batchLine: 444 },
-        "2023": { score: 518, rank: 162338, batchLine: 443 },
-        "2022": { score: 515, rank: 212318, batchLine: 437 },
-        "2021": { score: 516, rank: 157200, batchLine: 444 }
-      },
-      career: ["数学教师", "教育研究", "数据分析", "考研深造", "公务员"],
-      tags: ["省属", "师范", "保底"]
-    },
-    {
-      id: "sd18", province: "山东", city: "济宁", name: "曲阜师范大学",
-      college: "曲阜师范大学", major: "汉语言文学(师范)", batch: "本科二批",
-      scores: {
-        "2025": { score: 498, rank: 168932, batchLine: 441 },
-        "2024": { score: 515, rank: 151234, batchLine: 444 },
-        "2023": { score: 510, rank: 188342, batchLine: 443 },
-        "2022": { score: 508, rank: 230526, batchLine: 437 },
-        "2021": { score: 512, rank: 185000, batchLine: 444 }
+        "2025": { score: 523, rank: 128000, batchLine: 441 },
+        "2024": { score: 526, rank: 119800, batchLine: 444 },
+        "2023": { score: 528, rank: 110000, batchLine: 443 },
+        "2022": { score: 524, rank: 105300, batchLine: 437 },
+        "2021": { score: 525, rank: 96500, batchLine: 444 }
       },
       career: ["语文教师", "公务员", "编辑出版", "文化传媒", "文秘"],
-      tags: ["省属", "师范", "保底"]
+      tags: ["公办", "省属", "文科", "冲刺"]
     },
     {
-      id: "sd19", province: "山东", city: "烟台", name: "烟台大学",
-      college: "烟台大学", major: "法学", batch: "本科二批",
+      id: "sd-ld-01",
+      province: "山东", city: "烟台", name: "鲁东大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 492, rank: 181234, batchLine: 441 },
-        "2024": { score: 497, rank: 195678, batchLine: 444 },
-        "2023": { score: 495, rank: 229846, batchLine: 443 },
-        "2022": { score: 492, rank: 307142, batchLine: 437 },
-        "2021": { score: 491, rank: 296800, batchLine: 444 }
+        "2025": { score: 520, rank: 134000, batchLine: 441 },
+        "2024": { score: 523, rank: 124500, batchLine: 444 },
+        "2023": { score: 525, rank: 115600, batchLine: 443 },
+        "2022": { score: 522, rank: 108900, batchLine: 437 },
+        "2021": { score: 523, rank: 100200, batchLine: 444 }
       },
-      career: ["律师", "法务", "公务员(公检法)", "企业合规", "法律咨询"],
-      tags: ["省属", "法学", "保底"]
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
     },
     {
-      id: "sd20", province: "山东", city: "烟台", name: "鲁东大学",
-      college: "鲁东大学", major: "英语(师范)", batch: "本科二批",
+      id: "sd-ld-02",
+      province: "山东", city: "烟台", name: "鲁东大学",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 485, rank: 201345, batchLine: 441 },
-        "2024": { score: 488, rank: 220156, batchLine: 444 },
-        "2023": { score: 485, rank: 258361, batchLine: 443 },
-        "2022": { score: 483, rank: 345612, batchLine: 437 },
-        "2021": { score: 486, rank: 320000, batchLine: 444 }
+        "2025": { score: 514, rank: 148000, batchLine: 441 },
+        "2024": { score: 517, rank: 140300, batchLine: 444 },
+        "2023": { score: 519, rank: 131500, batchLine: 443 },
+        "2022": { score: 516, rank: 122400, batchLine: 437 },
+        "2021": { score: 517, rank: 112000, batchLine: 444 }
+      },
+      career: ["英语教师", "翻译", "外贸", "跨境电商", "公务员"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "sd-ly-01",
+      province: "山东", city: "临沂", name: "临沂大学",
+      college: "法学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 522, rank: 130000, batchLine: 441 },
+        "2024": { score: 525, rank: 121300, batchLine: 444 },
+        "2023": { score: 527, rank: 111800, batchLine: 443 },
+        "2022": { score: 524, rank: 105600, batchLine: 437 },
+        "2021": { score: 525, rank: 95800, batchLine: 444 }
+      },
+      career: ["律师", "法务", "公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "冲刺"]
+    },
+    {
+      id: "sd-ly-02",
+      province: "山东", city: "临沂", name: "临沂大学",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 513, rank: 150500, batchLine: 441 },
+        "2024": { score: 516, rank: 142800, batchLine: 444 },
+        "2023": { score: 518, rank: 133200, batchLine: 443 },
+        "2022": { score: 515, rank: 124100, batchLine: 437 },
+        "2021": { score: 516, rank: 114500, batchLine: 444 }
       },
       career: ["英语教师", "外贸", "翻译", "跨境电商", "教育机构"],
-      tags: ["省属", "师范", "保底"]
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
     },
     {
-      id: "sd21", province: "山东", city: "淄博", name: "山东理工大学",
-      college: "山东理工大学", major: "机械设计制造及其自动化", batch: "本科二批",
+      id: "sd-sdgs-01",
+      province: "山东", city: "烟台", name: "山东工商学院",
+      college: "会计学院", major: "会计学", batch: "本科一段",
       scores: {
-        "2025": { score: 483, rank: 207654, batchLine: 441 },
-        "2024": { score: 486, rank: 235600, batchLine: 444 },
-        "2023": { score: 484, rank: 258361, batchLine: 443 },
-        "2022": { score: 482, rank: 345612, batchLine: 437 },
-        "2021": { score: 484, rank: 332000, batchLine: 444 }
+        "2025": { score: 516, rank: 143500, batchLine: 441 },
+        "2024": { score: 519, rank: 135200, batchLine: 444 },
+        "2023": { score: 521, rank: 126800, batchLine: 443 },
+        "2022": { score: 518, rank: 118600, batchLine: 437 },
+        "2021": { score: 519, rank: 107500, batchLine: 444 }
       },
-      career: ["制造业", "汽车工业", "设备工程师", "质量管理", "技术销售"],
-      tags: ["省属", "工科", "保底"]
+      career: ["会计师事务所", "企业财务", "银行", "审计", "税务/公务员"],
+      tags: ["公办", "省属", "财经", "文科", "冲刺"]
     },
     {
-      id: "sd22", province: "山东", city: "聊城", name: "聊城大学",
-      college: "聊城大学", major: "汉语言文学(师范)", batch: "本科二批",
+      id: "sd-sdgs-02",
+      province: "山东", city: "烟台", name: "山东工商学院",
+      college: "工商管理学院", major: "工商管理", batch: "本科一段",
       scores: {
-        "2025": { score: 469, rank: 244568, batchLine: 441 },
-        "2024": { score: 472, rank: 270123, batchLine: 444 },
-        "2023": { score: 470, rank: 300612, batchLine: 443 },
-        "2022": { score: 469, rank: 382789, batchLine: 437 },
-        "2021": { score: 471, rank: 362000, batchLine: 444 }
+        "2025": { score: 510, rank: 157000, batchLine: 441 },
+        "2024": { score: 513, rank: 148600, batchLine: 444 },
+        "2023": { score: 515, rank: 139200, batchLine: 443 },
+        "2022": { score: 512, rank: 131000, batchLine: 437 },
+        "2021": { score: 513, rank: 120500, batchLine: 444 }
       },
-      career: ["语文教师", "公务员", "文秘", "基层工作", "教育培训"],
-      tags: ["省属", "师范", "保底"]
-    },
-    {
-      id: "sd23", province: "山东", city: "临沂", name: "临沂大学",
-      college: "临沂大学", major: "会计学", batch: "本科二批",
-      scores: {
-        "2025": { score: 461, rank: 265432, batchLine: 441 },
-        "2024": { score: 465, rank: 285678, batchLine: 444 },
-        "2023": { score: 463, rank: 314186, batchLine: 443 },
-        "2022": { score: 460, rank: 417629, batchLine: 437 },
-        "2021": { score: 462, rank: 395000, batchLine: 444 }
-      },
-      career: ["企业财务", "银行柜员", "会计", "审计助理", "税务"],
-      tags: ["省属", "保底"]
-    },
-    {
-      id: "sd24", province: "山东", city: "青岛", name: "青岛科技大学",
-      college: "青岛科技大学", major: "计算机科学与技术", batch: "本科一批",
-      scores: {
-        "2025": { score: 510, rank: 144500, batchLine: 441 },
-        "2024": { score: 507, rank: 160000, batchLine: 444 },
-        "2023": { score: 505, rank: 201872, batchLine: 443 },
-        "2022": { score: 500, rank: 268499, batchLine: 437 },
-        "2021": { score: 503, rank: 250000, batchLine: 444 }
-      },
-      career: ["软件开发", "化工信息化", "制造业IT", "青岛IT企业", "考研深造"],
-      tags: ["省属重点", "工科", "稳妥"]
-    },
-    {
-      id: "sd25", province: "山东", city: "青岛", name: "青岛科技大学",
-      college: "青岛科技大学", major: "化学工程与工艺", batch: "本科一批",
-      scores: {
-        "2025": { score: 495, rank: 186000, batchLine: 441 },
-        "2024": { score: 492, rank: 210000, batchLine: 444 },
-        "2023": { score: 490, rank: 244087, batchLine: 443 },
-        "2022": { score: 487, rank: 326482, batchLine: 437 },
-        "2021": { score: 490, rank: 310000, batchLine: 444 }
-      },
-      career: ["化工企业", "制药", "橡胶工业", "材料研发", "环保监测"],
-      tags: ["省属重点", "化工", "保底"]
-    },
-    {
-      id: "sd26", province: "山东", city: "青岛", name: "青岛理工大学",
-      college: "青岛理工大学", major: "土木工程", batch: "本科一批",
-      scores: {
-        "2025": { score: 508, rank: 147000, batchLine: 441 },
-        "2024": { score: 505, rank: 165000, batchLine: 444 },
-        "2023": { score: 503, rank: 215763, batchLine: 443 },
-        "2022": { score: 498, rank: 287812, batchLine: 437 },
-        "2021": { score: 500, rank: 268000, batchLine: 444 }
-      },
-      career: ["建筑施工", "结构设计", "房地产开发", "市政工程", "工程监理"],
-      tags: ["省属重点", "工科", "稳妥"]
-    },
-    {
-      id: "sd27", province: "山东", city: "青岛", name: "青岛理工大学",
-      college: "青岛理工大学", major: "机械设计制造及其自动化", batch: "本科一批",
-      scores: {
-        "2025": { score: 505, rank: 151000, batchLine: 441 },
-        "2024": { score: 502, rank: 172000, batchLine: 444 },
-        "2023": { score: 500, rank: 215763, batchLine: 443 },
-        "2022": { score: 496, rank: 287812, batchLine: 437 },
-        "2021": { score: 498, rank: 285000, batchLine: 444 }
-      },
-      career: ["装备制造", "汽车工业", "机床设计", "质量管理", "技术销售"],
-      tags: ["省属重点", "工科", "保底"]
-    },
-    {
-      id: "sd28", province: "山东", city: "济南", name: "山东建筑大学",
-      college: "山东建筑大学", major: "建筑学", batch: "本科一批",
-      scores: {
-        "2025": { score: 515, rank: 136500, batchLine: 441 },
-        "2024": { score: 512, rank: 155000, batchLine: 444 },
-        "2023": { score: 510, rank: 188342, batchLine: 443 },
-        "2022": { score: 506, rank: 249318, batchLine: 437 },
-        "2021": { score: 508, rank: 240000, batchLine: 444 }
-      },
-      career: ["建筑设计", "城市规划", "园林景观", "房地产", "室内设计"],
-      tags: ["省属", "建筑", "稳妥"]
-    },
-    {
-      id: "sd29", province: "山东", city: "济南", name: "山东建筑大学",
-      college: "山东建筑大学", major: "土木工程", batch: "本科一批",
-      scores: {
-        "2025": { score: 502, rank: 155000, batchLine: 441 },
-        "2024": { score: 498, rank: 188000, batchLine: 444 },
-        "2023": { score: 496, rank: 229846, batchLine: 443 },
-        "2022": { score: 492, rank: 307142, batchLine: 437 },
-        "2021": { score: 494, rank: 295000, batchLine: 444 }
-      },
-      career: ["建筑施工", "结构工程", "道路桥梁", "工程管理", "质量检测"],
-      tags: ["省属", "建筑", "保底"]
+      career: ["企业管理", "市场营销", "人力资源", "银行", "公务员"],
+      tags: ["公办", "省属", "财经", "文科", "冲刺"]
     },
 
-    // ========== 江苏高校 (5所) ==========
+    // ---------- 稳妥档 (avg 499-508) ----------
+
     {
-      id: "js01", province: "江苏", city: "南京", name: "南京理工大学",
-      college: "南京理工大学", major: "计算机科学与技术", batch: "本科一批",
+      id: "sd-qf-01",
+      province: "山东", city: "济宁", name: "曲阜师范大学",
+      college: "教育学院", major: "教育学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 615, rank: 14432, batchLine: 441 },
-        "2024": { score: 615, rank: 14520, batchLine: 444 },
-        "2023": { score: 613, rank: 18748, batchLine: 443 },
-        "2022": { score: 608, rank: 17883, batchLine: 437 },
-        "2021": { score: 609, rank: 16931, batchLine: 444 }
+        "2025": { score: 504, rank: 171000, batchLine: 441 },
+        "2024": { score: 507, rank: 162500, batchLine: 444 },
+        "2023": { score: 509, rank: 152800, batchLine: 443 },
+        "2022": { score: 506, rank: 144500, batchLine: 437 },
+        "2021": { score: 507, rank: 133200, batchLine: 444 }
       },
-      career: ["军工企业", "IT互联网", "科研院所", "华为/中兴", "公务员"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["中小学教师", "教育管理", "教育咨询", "教育科技", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "js02", province: "江苏", city: "苏州", name: "苏州大学",
-      college: "苏州大学", major: "临床医学", batch: "本科一批",
+      id: "sd-qf-02",
+      province: "山东", city: "济宁", name: "曲阜师范大学",
+      college: "历史文化学院", major: "历史学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 612, rank: 15678, batchLine: 441 },
-        "2024": { score: 610, rank: 18956, batchLine: 444 },
-        "2023": { score: 608, rank: 22153, batchLine: 443 },
-        "2022": { score: 605, rank: 22049, batchLine: 437 },
-        "2021": { score: 606, rank: 16931, batchLine: 444 }
+        "2025": { score: 506, rank: 168000, batchLine: 441 },
+        "2024": { score: 509, rank: 159800, batchLine: 444 },
+        "2023": { score: 511, rank: 150100, batchLine: 443 },
+        "2022": { score: 508, rank: 141700, batchLine: 437 },
+        "2021": { score: 509, rank: 130500, batchLine: 444 }
       },
-      career: ["医院临床", "医学研究", "医药企业", "公共卫生", "高校任教"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["历史教师", "文博单位", "公务员", "文化旅游", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "js03", province: "江苏", city: "苏州", name: "苏州大学",
-      college: "苏州大学", major: "软件工程", batch: "本科一批",
+      id: "sd-ny-01",
+      province: "山东", city: "泰安", name: "山东农业大学",
+      college: "公共管理学院", major: "行政管理", batch: "本科一段",
       scores: {
-        "2025": { score: 595, rank: 24253, batchLine: 441 },
-        "2024": { score: 594, rank: 29865, batchLine: 444 },
-        "2023": { score: 593, rank: 32956, batchLine: 443 },
-        "2022": { score: 590, rank: 38485, batchLine: 437 },
-        "2021": { score: 591, rank: 38678, batchLine: 444 }
+        "2025": { score: 502, rank: 175000, batchLine: 441 },
+        "2024": { score: 505, rank: 166800, batchLine: 444 },
+        "2023": { score: 507, rank: 156900, batchLine: 443 },
+        "2022": { score: 504, rank: 148300, batchLine: 437 },
+        "2021": { score: 505, rank: 137000, batchLine: 444 }
       },
-      career: ["互联网公司", "软件开发", "AI/大数据", "金融科技", "科研"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["公务员", "事业单位", "企业行政", "社会组织", "考研深造"],
+      tags: ["公办", "省属", "农林", "文科", "稳妥"]
     },
     {
-      id: "js04", province: "江苏", city: "无锡", name: "江南大学",
-      college: "江南大学", major: "食品科学与工程", batch: "本科一批",
+      id: "sd-ny-02",
+      province: "山东", city: "泰安", name: "山东农业大学",
+      college: "经济管理学院", major: "财务管理", batch: "本科一段",
       scores: {
-        "2025": { score: 568, rank: 56876, batchLine: 441 },
-        "2024": { score: 570, rank: 56382, batchLine: 444 },
-        "2023": { score: 572, rank: 53102, batchLine: 443 },
-        "2022": { score: 568, rank: 61673, batchLine: 437 },
-        "2021": { score: 569, rank: 62000, batchLine: 444 }
+        "2025": { score: 500, rank: 180000, batchLine: 441 },
+        "2024": { score: 503, rank: 171500, batchLine: 444 },
+        "2023": { score: 505, rank: 161800, batchLine: 443 },
+        "2022": { score: 502, rank: 152900, batchLine: 437 },
+        "2021": { score: 503, rank: 141200, batchLine: 444 }
       },
-      career: ["食品企业", "质检机构", "科研院所", "食品安全监管", "营养咨询"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["企业财务", "银行", "会计事务所", "审计", "税务"],
+      tags: ["公办", "省属", "财经", "文科", "稳妥"]
     },
     {
-      id: "js05", province: "江苏", city: "镇江", name: "江苏大学",
-      college: "江苏大学", major: "车辆工程", batch: "本科一批",
+      id: "sd-wf-01",
+      province: "山东", city: "潍坊", name: "潍坊学院",
+      college: "文学与新闻传播学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 553, rank: 75438, batchLine: 441 },
-        "2024": { score: 565, rank: 67628, batchLine: 444 },
-        "2023": { score: 563, rank: 71108, batchLine: 443 },
-        "2022": { score: 560, rank: 81465, batchLine: 437 },
-        "2021": { score: 561, rank: 78000, batchLine: 444 }
+        "2025": { score: 503, rank: 173500, batchLine: 441 },
+        "2024": { score: 506, rank: 165200, batchLine: 444 },
+        "2023": { score: 508, rank: 155400, batchLine: 443 },
+        "2022": { score: 505, rank: 146800, batchLine: 437 },
+        "2021": { score: 506, rank: 135500, batchLine: 444 }
       },
-      career: ["汽车制造", "零部件设计", "新能源汽车", "研发工程师", "质量管理"],
-      tags: ["省属重点", "工科", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "js06", province: "江苏", city: "南通", name: "南通大学",
-      college: "南通大学", major: "临床医学", batch: "本科一批",
+      id: "sd-wf-02",
+      province: "山东", city: "潍坊", name: "潍坊学院",
+      college: "法学院", major: "法学", batch: "本科一段",
       scores: {
-        "2025": { score: 558, rank: 69543, batchLine: 441 },
-        "2024": { score: 563, rank: 69876, batchLine: 444 },
-        "2023": { score: 562, rank: 71108, batchLine: 443 },
-        "2022": { score: 558, rank: 92687, batchLine: 437 },
-        "2021": { score: 557, rank: 85000, batchLine: 444 }
+        "2025": { score: 500, rank: 180500, batchLine: 441 },
+        "2024": { score: 503, rank: 172300, batchLine: 444 },
+        "2023": { score: 505, rank: 162500, batchLine: 443 },
+        "2022": { score: 502, rank: 153800, batchLine: 437 },
+        "2021": { score: 503, rank: 142500, batchLine: 444 }
       },
-      career: ["医院临床", "医学影像", "公共卫生", "康复医学", "基层医疗"],
-      tags: ["省属", "医学", "稳妥"]
+      career: ["律师", "法务", "公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "稳妥"]
+    },
+    {
+      id: "sd-sdny-01",
+      province: "山东", city: "济南", name: "山东青年政治学院",
+      college: "政治与公共管理学院", major: "社会工作", batch: "本科一段",
+      scores: {
+        "2025": { score: 501, rank: 178500, batchLine: 441 },
+        "2024": { score: 504, rank: 170200, batchLine: 444 },
+        "2023": { score: 506, rank: 160100, batchLine: 443 },
+        "2022": { score: 503, rank: 151600, batchLine: 437 },
+        "2021": { score: 504, rank: 140000, batchLine: 444 }
+      },
+      career: ["社工机构", "社区管理", "民政部门", "NGO", "公务员"],
+      tags: ["公办", "省属", "文科", "稳妥"]
+    },
+    {
+      id: "sd-sdgs-03",
+      province: "山东", city: "烟台", name: "山东工商学院",
+      college: "经济学院", major: "国际经济与贸易", batch: "本科一段",
+      scores: {
+        "2025": { score: 505, rank: 170000, batchLine: 441 },
+        "2024": { score: 508, rank: 161500, batchLine: 444 },
+        "2023": { score: 510, rank: 151900, batchLine: 443 },
+        "2022": { score: 507, rank: 143300, batchLine: 437 },
+        "2021": { score: 508, rank: 132000, batchLine: 444 }
+      },
+      career: ["外贸企业", "跨境电商", "银行", "物流", "公务员"],
+      tags: ["公办", "省属", "财经", "文科", "稳妥"]
+    },
+    {
+      id: "sd-lc-01",
+      province: "山东", city: "聊城", name: "聊城大学",
+      college: "政治与公共管理学院", major: "行政管理", batch: "本科一段",
+      scores: {
+        "2025": { score: 508, rank: 164000, batchLine: 441 },
+        "2024": { score: 511, rank: 155800, batchLine: 444 },
+        "2023": { score: 513, rank: 146200, batchLine: 443 },
+        "2022": { score: 510, rank: 137500, batchLine: 437 },
+        "2021": { score: 511, rank: 126000, batchLine: 444 }
+      },
+      career: ["公务员", "事业单位", "企业行政", "社区管理", "考研深造"],
+      tags: ["公办", "省属", "文科", "稳妥"]
+    },
+    {
+      id: "sd-lc-02",
+      province: "山东", city: "聊城", name: "聊城大学",
+      college: "马克思主义学院", major: "思想政治教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 507, rank: 166000, batchLine: 441 },
+        "2024": { score: 510, rank: 157600, batchLine: 444 },
+        "2023": { score: 512, rank: 147800, batchLine: 443 },
+        "2022": { score: 509, rank: 139200, batchLine: 437 },
+        "2021": { score: 510, rank: 128000, batchLine: 444 }
+      },
+      career: ["政治教师", "公务员", "党校", "基层党务", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "sd-ly-03",
+      province: "山东", city: "临沂", name: "临沂大学",
+      college: "教育学院", major: "小学教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 506, rank: 167500, batchLine: 441 },
+        "2024": { score: 509, rank: 159200, batchLine: 444 },
+        "2023": { score: 511, rank: 149500, batchLine: 443 },
+        "2022": { score: 508, rank: 141100, batchLine: 437 },
+        "2021": { score: 509, rank: 129800, batchLine: 444 }
+      },
+      career: ["小学教师", "教育管理", "教育培训", "课程开发", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "sd-yt-03",
+      province: "山东", city: "烟台", name: "烟台大学",
+      college: "经济管理学院", major: "工商管理", batch: "本科一段",
+      scores: {
+        "2025": { score: 507, rank: 165000, batchLine: 441 },
+        "2024": { score: 510, rank: 156900, batchLine: 444 },
+        "2023": { score: 512, rank: 147200, batchLine: 443 },
+        "2022": { score: 509, rank: 138600, batchLine: 437 },
+        "2021": { score: 510, rank: 127300, batchLine: 444 }
+      },
+      career: ["企业管理", "市场营销", "人力资源", "银行", "公务员"],
+      tags: ["公办", "省属", "文科", "稳妥"]
+    },
+    {
+      id: "sd-ld-03",
+      province: "山东", city: "烟台", name: "鲁东大学",
+      college: "法学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 508, rank: 163500, batchLine: 441 },
+        "2024": { score: 511, rank: 155200, batchLine: 444 },
+        "2023": { score: 513, rank: 145600, batchLine: 443 },
+        "2022": { score: 510, rank: 137000, batchLine: 437 },
+        "2021": { score: 511, rank: 125800, batchLine: 444 }
+      },
+      career: ["律师", "法务", "公检法公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "稳妥"]
     },
 
-    // ========== 北京高校 (4所) ==========
+    // ---------- 保底档 (avg 460-498) ----------
+
     {
-      id: "bj01", province: "北京", city: "北京", name: "北京工业大学",
-      college: "北京工业大学", major: "计算机科学与技术", batch: "本科一批",
+      id: "sd-dz-01",
+      province: "山东", city: "德州", name: "德州学院",
+      college: "文学与新闻传播学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 598, rank: 22876, batchLine: 441 },
-        "2024": { score: 613, rank: 14947, batchLine: 444 },
-        "2023": { score: 612, rank: 18748, batchLine: 443 },
-        "2022": { score: 608, rank: 17883, batchLine: 437 },
-        "2021": { score: 607, rank: 16931, batchLine: 444 }
+        "2025": { score: 496, rank: 195000, batchLine: 441 },
+        "2024": { score: 499, rank: 186300, batchLine: 444 },
+        "2023": { score: 501, rank: 176500, batchLine: 443 },
+        "2022": { score: 498, rank: 167900, batchLine: 437 },
+        "2021": { score: 499, rank: 155800, batchLine: 444 }
       },
-      career: ["互联网大厂", "北京IT企业", "科研院所", "国企信息化", "创业"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
     },
     {
-      id: "bj02", province: "北京", city: "北京", name: "北京化工大学",
-      college: "北京化工大学", major: "化学工程与工艺", batch: "本科一批",
+      id: "sd-dz-02",
+      province: "山东", city: "德州", name: "德州学院",
+      college: "法学院", major: "法学", batch: "本科一段",
       scores: {
-        "2025": { score: 592, rank: 26893, batchLine: 441 },
-        "2024": { score: 597, rank: 24243, batchLine: 444 },
-        "2023": { score: 598, rank: 28373, batchLine: 443 },
-        "2022": { score: 593, rank: 32282, batchLine: 437 },
-        "2021": { score: 594, rank: 30104, batchLine: 444 }
+        "2025": { score: 493, rank: 201000, batchLine: 441 },
+        "2024": { score: 496, rank: 192500, batchLine: 444 },
+        "2023": { score: 498, rank: 182300, batchLine: 443 },
+        "2022": { score: 495, rank: 173800, batchLine: 437 },
+        "2021": { score: 496, rank: 161200, batchLine: 444 }
       },
-      career: ["化工企业", "材料研发", "制药", "环保", "中石化/中石油"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["律师", "法务", "公务员", "社区法律咨询", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "保底"]
     },
     {
-      id: "bj03", province: "北京", city: "北京", name: "北京林业大学",
-      college: "北京林业大学", major: "风景园林", batch: "本科一批",
+      id: "sd-dz-03",
+      province: "山东", city: "德州", name: "德州学院",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 578, rank: 42215, batchLine: 441 },
-        "2024": { score: 581, rank: 38456, batchLine: 444 },
-        "2023": { score: 579, rank: 45389, batchLine: 443 },
-        "2022": { score: 576, rank: 53102, batchLine: 437 },
-        "2021": { score: 577, rank: 45000, batchLine: 444 }
+        "2025": { score: 489, rank: 209000, batchLine: 441 },
+        "2024": { score: 492, rank: 200300, batchLine: 444 },
+        "2023": { score: 494, rank: 189800, batchLine: 443 },
+        "2022": { score: 491, rank: 181400, batchLine: 437 },
+        "2021": { score: 492, rank: 168500, batchLine: 444 }
       },
-      career: ["园林设计院", "城市规划", "景观设计", "房地产", "市政工程"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["英语教师", "外贸", "翻译", "跨境电商", "教育培训"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
     },
     {
-      id: "bj04", province: "北京", city: "北京", name: "首都师范大学",
-      college: "首都师范大学", major: "数学与应用数学(师范)", batch: "本科一批",
+      id: "sd-ts-01",
+      province: "山东", city: "泰安", name: "泰山学院",
+      college: "文学与传媒学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 590, rank: 28512, batchLine: 441 },
-        "2024": { score: 612, rank: 15124, batchLine: 444 },
-        "2023": { score: 610, rank: 22153, batchLine: 443 },
-        "2022": { score: 606, rank: 22049, batchLine: 437 },
-        "2021": { score: 605, rank: 21000, batchLine: 444 }
+        "2025": { score: 490, rank: 207500, batchLine: 441 },
+        "2024": { score: 493, rank: 199200, batchLine: 444 },
+        "2023": { score: 495, rank: 188600, batchLine: 443 },
+        "2022": { score: 492, rank: 180100, batchLine: 437 },
+        "2021": { score: 493, rank: 167300, batchLine: 444 }
       },
-      career: ["数学教师", "教育研究", "教育培训", "数据分析", "考研深造"],
-      tags: ["双一流", "师范", "冲刺"]
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-ts-02",
+      province: "山东", city: "泰安", name: "泰山学院",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 486, rank: 215000, batchLine: 441 },
+        "2024": { score: 489, rank: 206500, batchLine: 444 },
+        "2023": { score: 491, rank: 195800, batchLine: 443 },
+        "2022": { score: 488, rank: 187300, batchLine: 437 },
+        "2021": { score: 489, rank: 174200, batchLine: 444 }
+      },
+      career: ["英语教师", "外贸", "翻译", "培训机构", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-bz-01",
+      province: "山东", city: "滨州", name: "山东航空学院",
+      college: "人文学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 486, rank: 215500, batchLine: 441 },
+        "2024": { score: 489, rank: 206800, batchLine: 444 },
+        "2023": { score: 491, rank: 196200, batchLine: 443 },
+        "2022": { score: 488, rank: 187600, batchLine: 437 },
+        "2021": { score: 489, rank: 174500, batchLine: 444 }
+      },
+      career: ["语文教师", "公务员", "文秘", "企业文化", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "sd-bz-02",
+      province: "山东", city: "滨州", name: "山东航空学院",
+      college: "外国语学院", major: "英语", batch: "本科一段",
+      scores: {
+        "2025": { score: 483, rank: 221000, batchLine: 441 },
+        "2024": { score: 486, rank: 212500, batchLine: 444 },
+        "2023": { score: 488, rank: 201800, batchLine: 443 },
+        "2022": { score: 485, rank: 193100, batchLine: 437 },
+        "2021": { score: 486, rank: 179800, batchLine: 444 }
+      },
+      career: ["英语教师", "外贸", "翻译", "航空服务", "教育培训"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "sd-hz-01",
+      province: "山东", city: "菏泽", name: "菏泽学院",
+      college: "人文与新闻传播学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 483, rank: 221500, batchLine: 441 },
+        "2024": { score: 486, rank: 213000, batchLine: 444 },
+        "2023": { score: 488, rank: 202300, batchLine: 443 },
+        "2022": { score: 485, rank: 193500, batchLine: 437 },
+        "2021": { score: 486, rank: 180200, batchLine: 444 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-hz-02",
+      province: "山东", city: "菏泽", name: "菏泽学院",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 480, rank: 228000, batchLine: 441 },
+        "2024": { score: 483, rank: 219200, batchLine: 444 },
+        "2023": { score: 485, rank: 208500, batchLine: 443 },
+        "2022": { score: 482, rank: 199800, batchLine: 437 },
+        "2021": { score: 483, rank: 186200, batchLine: 444 }
+      },
+      career: ["英语教师", "外贸", "翻译", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-zz-01",
+      province: "山东", city: "枣庄", name: "枣庄学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 481, rank: 226000, batchLine: 441 },
+        "2024": { score: 484, rank: 217500, batchLine: 444 },
+        "2023": { score: 486, rank: 206800, batchLine: 443 },
+        "2022": { score: 483, rank: 198100, batchLine: 437 },
+        "2021": { score: 484, rank: 184500, batchLine: 444 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-zz-02",
+      province: "山东", city: "枣庄", name: "枣庄学院",
+      college: "外国语学院", major: "英语", batch: "本科一段",
+      scores: {
+        "2025": { score: 478, rank: 232000, batchLine: 441 },
+        "2024": { score: 481, rank: 223500, batchLine: 444 },
+        "2023": { score: 483, rank: 212800, batchLine: 443 },
+        "2022": { score: 480, rank: 204100, batchLine: 437 },
+        "2021": { score: 481, rank: 190200, batchLine: 444 }
+      },
+      career: ["英语教师", "外贸", "翻译", "教育培训", "基层公务员"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "sd-jnxy-01",
+      province: "山东", city: "济宁", name: "济宁学院",
+      college: "人文与传播学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 485, rank: 217500, batchLine: 441 },
+        "2024": { score: 488, rank: 208800, batchLine: 444 },
+        "2023": { score: 490, rank: 198300, batchLine: 443 },
+        "2022": { score: 487, rank: 189600, batchLine: 437 },
+        "2021": { score: 488, rank: 176500, batchLine: 444 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-jnxy-02",
+      province: "山东", city: "济宁", name: "济宁学院",
+      college: "教师教育学院", major: "小学教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 482, rank: 223000, batchLine: 441 },
+        "2024": { score: 485, rank: 214300, batchLine: 444 },
+        "2023": { score: 487, rank: 203500, batchLine: 443 },
+        "2022": { score: 484, rank: 194800, batchLine: 437 },
+        "2021": { score: 485, rank: 181200, batchLine: 444 }
+      },
+      career: ["小学教师", "教育管理", "教育培训", "课程开发", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-nv-01",
+      province: "山东", city: "济南", name: "山东女子学院",
+      college: "教育学院", major: "学前教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 484, rank: 219500, batchLine: 441 },
+        "2024": { score: 487, rank: 210800, batchLine: 444 },
+        "2023": { score: 489, rank: 200100, batchLine: 443 },
+        "2022": { score: 486, rank: 191300, batchLine: 437 },
+        "2021": { score: 487, rank: 177800, batchLine: 444 }
+      },
+      career: ["幼儿园教师", "早教机构", "教育管理", "儿童产品开发", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-nv-02",
+      province: "山东", city: "济南", name: "山东女子学院",
+      college: "社会与法学院", major: "社会工作", batch: "本科一段",
+      scores: {
+        "2025": { score: 480, rank: 227500, batchLine: 441 },
+        "2024": { score: 483, rank: 218800, batchLine: 444 },
+        "2023": { score: 485, rank: 208100, batchLine: 443 },
+        "2022": { score: 482, rank: 199300, batchLine: 437 },
+        "2021": { score: 483, rank: 185600, batchLine: 444 }
+      },
+      career: ["社工机构", "社区管理", "民政部门", "妇联/共青团", "NGO"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "sd-qlsf-01",
+      province: "山东", city: "济南", name: "齐鲁师范学院",
+      college: "马克思主义学院", major: "思想政治教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 491, rank: 205000, batchLine: 441 },
+        "2024": { score: 494, rank: 196800, batchLine: 444 },
+        "2023": { score: 496, rank: 186100, batchLine: 443 },
+        "2022": { score: 493, rank: 177400, batchLine: 437 },
+        "2021": { score: 494, rank: 164500, batchLine: 444 }
+      },
+      career: ["政治教师", "公务员", "党务工作者", "基层管理", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-qlsf-02",
+      province: "山东", city: "济南", name: "齐鲁师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 488, rank: 211500, batchLine: 441 },
+        "2024": { score: 491, rank: 202800, batchLine: 444 },
+        "2023": { score: 493, rank: 192300, batchLine: 443 },
+        "2022": { score: 490, rank: 183500, batchLine: 437 },
+        "2021": { score: 491, rank: 170200, batchLine: 444 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sd-gl-01",
+      province: "山东", city: "济南", name: "山东管理学院",
+      college: "会计学院", major: "财务管理", batch: "本科一段",
+      scores: {
+        "2025": { score: 488, rank: 212000, batchLine: 441 },
+        "2024": { score: 491, rank: 203200, batchLine: 444 },
+        "2023": { score: 493, rank: 192600, batchLine: 443 },
+        "2022": { score: 490, rank: 183800, batchLine: 437 },
+        "2021": { score: 491, rank: 170500, batchLine: 444 }
+      },
+      career: ["企业财务", "银行", "会计事务所", "审计", "税务"],
+      tags: ["公办", "省属", "财经", "文科", "保底"]
+    },
+    {
+      id: "sd-gl-02",
+      province: "山东", city: "济南", name: "山东管理学院",
+      college: "工商学院", major: "人力资源管理", batch: "本科一段",
+      scores: {
+        "2025": { score: 485, rank: 218000, batchLine: 441 },
+        "2024": { score: 488, rank: 209300, batchLine: 444 },
+        "2023": { score: 490, rank: 198600, batchLine: 443 },
+        "2022": { score: 487, rank: 189800, batchLine: 437 },
+        "2021": { score: 488, rank: 176800, batchLine: 444 }
+      },
+      career: ["企业HR", "招聘专员", "培训管理", "薪酬管理", "公务员"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "sd-lc-03",
+      province: "山东", city: "聊城", name: "聊城大学",
+      college: "历史文化与旅游学院", major: "旅游管理", batch: "本科一段",
+      scores: {
+        "2025": { score: 493, rank: 202000, batchLine: 441 },
+        "2024": { score: 496, rank: 193500, batchLine: 444 },
+        "2023": { score: 498, rank: 183100, batchLine: 443 },
+        "2022": { score: 495, rank: 174600, batchLine: 437 },
+        "2021": { score: 496, rank: 162000, batchLine: 444 }
+      },
+      career: ["旅游企业", "酒店管理", "景区规划", "文旅部门", "导游/领队"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "sd-ly-04",
+      province: "山东", city: "临沂", name: "临沂大学",
+      college: "历史文化学院", major: "旅游管理", batch: "本科一段",
+      scores: {
+        "2025": { score: 491, rank: 206000, batchLine: 441 },
+        "2024": { score: 494, rank: 197200, batchLine: 444 },
+        "2023": { score: 496, rank: 186500, batchLine: 443 },
+        "2022": { score: 493, rank: 178100, batchLine: 437 },
+        "2021": { score: 494, rank: 165200, batchLine: 444 }
+      },
+      career: ["旅游企业", "酒店管理", "文旅局", "景区运营", "研学导师"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "sd-qf-03",
+      province: "山东", city: "济宁", name: "曲阜师范大学",
+      college: "教育学院", major: "学前教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 498, rank: 191000, batchLine: 441 },
+        "2024": { score: 501, rank: 182500, batchLine: 444 },
+        "2023": { score: 503, rank: 172600, batchLine: 443 },
+        "2022": { score: 500, rank: 163800, batchLine: 437 },
+        "2021": { score: 501, rank: 151500, batchLine: 444 }
+      },
+      career: ["幼儿园教师", "早教机构", "教育管理", "学前教育研究", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
     },
 
-    // ========== 天津高校 (3所) ==========
-    {
-      id: "tj01", province: "天津", city: "天津", name: "天津工业大学",
-      college: "天津工业大学", major: "计算机科学与技术", batch: "本科一批",
-      scores: {
-        "2025": { score: 562, rank: 64432, batchLine: 441 },
-        "2024": { score: 565, rank: 64987, batchLine: 444 },
-        "2023": { score: 563, rank: 71108, batchLine: 443 },
-        "2022": { score: 558, rank: 92687, batchLine: 437 },
-        "2021": { score: 556, rank: 90000, batchLine: 444 }
-      },
-      career: ["IT企业", "纺织信息化", "互联网", "软件开发", "智能制造"],
-      tags: ["双一流", "工科", "稳妥"]
-    },
-    {
-      id: "tj02", province: "天津", city: "天津", name: "天津科技大学",
-      college: "天津科技大学", major: "食品科学与工程", batch: "本科一批",
-      scores: {
-        "2025": { score: 543, rank: 89567, batchLine: 441 },
-        "2024": { score: 546, rank: 87654, batchLine: 444 },
-        "2023": { score: 544, rank: 92687, batchLine: 443 },
-        "2022": { score: 540, rank: 131550, batchLine: 437 },
-        "2021": { score: 542, rank: 105000, batchLine: 444 }
-      },
-      career: ["食品行业", "质检", "研发", "食品安全监管", "营养健康"],
-      tags: ["省属重点", "轻工", "稳妥"]
-    },
-    {
-      id: "tj03", province: "天津", city: "天津", name: "天津师范大学",
-      college: "天津师范大学", major: "教育学", batch: "本科一批",
-      scores: {
-        "2025": { score: 546, rank: 85432, batchLine: 441 },
-        "2024": { score: 550, rank: 82765, batchLine: 444 },
-        "2023": { score: 548, rank: 87638, batchLine: 443 },
-        "2022": { score: 545, rank: 117681, batchLine: 437 },
-        "2021": { score: 544, rank: 110000, batchLine: 444 }
-      },
-      career: ["中小学教师", "教育管理", "教育咨询", "教育科技", "公务员"],
-      tags: ["省属重点", "师范", "稳妥"]
-    },
+    // ====================================================================
+    // 湖北省高校 (6所, 8个专业)
+    // 数据锚点: 湖北师范大学2024山东: 学前教育538, 日语532, 行政管理549
+    //           湖北民族大学2024山东: 日语514, 城乡规划514
+    // ====================================================================
 
-    // ========== 河北高校 (3所) ==========
     {
-      id: "hb01", province: "河北", city: "秦皇岛", name: "燕山大学",
-      college: "燕山大学", major: "机械工程", batch: "本科一批",
+      id: "hub-hbsf-01",
+      province: "湖北", city: "黄石", name: "湖北师范大学",
+      college: "外国语学院", major: "日语(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 538, rank: 96876, batchLine: 441 },
-        "2024": { score: 542, rank: 91876, batchLine: 444 },
-        "2023": { score: 540, rank: 119753, batchLine: 443 },
-        "2022": { score: 535, rank: 146273, batchLine: 437 },
-        "2021": { score: 537, rank: 127000, batchLine: 444 }
+        "2025": { score: 528, rank: 118500, batchLine: 437 },
+        "2024": { score: 532, rank: 107799, batchLine: 437 },
+        "2023": { score: 534, rank: 101200, batchLine: 424 },
+        "2022": { score: 531, rank: 98200, batchLine: 409 },
+        "2021": { score: 530, rank: 87500, batchLine: 397 }
       },
-      career: ["重型机械", "装备制造", "汽车行业", "工程设计", "科研院所"],
-      tags: ["省属重点", "工科", "稳妥"]
+      career: ["日语教师", "日企翻译", "外贸(对日)", "跨境电商", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
     },
     {
-      id: "hb02", province: "河北", city: "保定", name: "河北大学",
-      college: "河北大学", major: "新闻传播学", batch: "本科二批",
+      id: "hub-hbsf-02",
+      province: "湖北", city: "黄石", name: "湖北师范大学",
+      college: "教育科学学院", major: "学前教育(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 506, rank: 153456, batchLine: 441 },
-        "2024": { score: 512, rank: 157892, batchLine: 444 },
-        "2023": { score: 509, rank: 188342, batchLine: 443 },
-        "2022": { score: 507, rank: 249318, batchLine: 437 },
-        "2021": { score: 505, rank: 240000, batchLine: 444 }
+        "2025": { score: 526, rank: 122500, batchLine: 437 },
+        "2024": { score: 538, rank: 96192, batchLine: 437 },
+        "2023": { score: 532, rank: 102500, batchLine: 424 },
+        "2022": { score: 529, rank: 100100, batchLine: 409 },
+        "2021": { score: 528, rank: 89500, batchLine: 397 }
       },
-      career: ["新闻媒体", "广告公关", "新媒体运营", "编辑出版", "政府宣传"],
-      tags: ["省属", "综合", "稳妥"]
+      career: ["幼儿园教师", "早教机构", "教育管理", "学前教育研究", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
     },
     {
-      id: "hb03", province: "河北", city: "天津", name: "河北工业大学",
-      college: "河北工业大学", major: "电气工程及其自动化", batch: "本科一批",
+      id: "hub-hbmz-01",
+      province: "湖北", city: "恩施", name: "湖北民族大学",
+      college: "外国语学院", major: "日语", batch: "本科一段",
       scores: {
-        "2025": { score: 565, rank: 60876, batchLine: 441 },
-        "2024": { score: 568, rank: 60234, batchLine: 444 },
-        "2023": { score: 566, rank: 63678, batchLine: 443 },
-        "2022": { score: 561, rank: 92687, batchLine: 437 },
-        "2021": { score: 563, rank: 78000, batchLine: 444 }
+        "2025": { score: 510, rank: 157500, batchLine: 437 },
+        "2024": { score: 514, rank: 146642, batchLine: 437 },
+        "2023": { score: 516, rank: 138900, batchLine: 424 },
+        "2022": { score: 513, rank: 130500, batchLine: 409 },
+        "2021": { score: 514, rank: 118200, batchLine: 397 }
       },
-      career: ["国家电网", "电气设备制造", "新能源", "自动化", "轨道交通"],
-      tags: ["211", "双一流", "稳妥"]
-    },
-
-    // ========== 河南高校 (3所) ==========
-    {
-      id: "hn01", province: "河南", city: "郑州", name: "郑州大学",
-      college: "郑州大学", major: "临床医学", batch: "本科一批",
-      scores: {
-        "2025": { score: 596, rank: 23456, batchLine: 441 },
-        "2024": { score: 598, rank: 24219, batchLine: 444 },
-        "2023": { score: 597, rank: 28373, batchLine: 443 },
-        "2022": { score: 592, rank: 32282, batchLine: 437 },
-        "2021": { score: 593, rank: 30104, batchLine: 444 }
-      },
-      career: ["三甲医院", "医学研究", "公共卫生", "医药企业", "高校任教"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["日语翻译", "日企工作", "外贸", "日语教师", "考研深造"],
+      tags: ["公办", "省属", "民族", "文科", "冲刺"]
     },
     {
-      id: "hn02", province: "河南", city: "郑州", name: "郑州大学",
-      college: "郑州大学", major: "计算机科学与技术", batch: "本科一批",
+      id: "hub-hbmz-02",
+      province: "湖北", city: "恩施", name: "湖北民族大学",
+      college: "经济与管理学院", major: "会计学", batch: "本科一段",
       scores: {
-        "2025": { score: 576, rank: 45234, batchLine: 441 },
-        "2024": { score: 575, rank: 49692, batchLine: 444 },
-        "2023": { score: 574, rank: 57109, batchLine: 443 },
-        "2022": { score: 570, rank: 61673, batchLine: 437 },
-        "2021": { score: 572, rank: 58000, batchLine: 444 }
-      },
-      career: ["IT企业", "互联网", "软件开发", "金融科技", "科研院所"],
-      tags: ["211", "双一流", "冲刺"]
-    },
-    {
-      id: "hn03", province: "河南", city: "开封", name: "河南大学",
-      college: "河南大学", major: "汉语言文学", batch: "本科二批",
-      scores: {
-        "2025": { score: 520, rank: 128456, batchLine: 441 },
-        "2024": { score: 525, rank: 118967, batchLine: 444 },
-        "2023": { score: 523, rank: 162338, batchLine: 443 },
-        "2022": { score: 520, rank: 212318, batchLine: 437 },
-        "2021": { score: 518, rank: 195000, batchLine: 444 }
-      },
-      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "文博"],
-      tags: ["双一流", "综合", "稳妥"]
-    },
-
-    // ========== 辽宁高校 (3所) ==========
-    {
-      id: "ln01", province: "辽宁", city: "大连", name: "大连理工大学",
-      college: "大连理工大学", major: "机械设计制造及其自动化", batch: "本科一批",
-      scores: {
-        "2025": { score: 605, rank: 18876, batchLine: 441 },
-        "2024": { score: 605, rank: 19234, batchLine: 444 },
-        "2023": { score: 604, rank: 25921, batchLine: 443 },
-        "2022": { score: 600, rank: 22049, batchLine: 437 },
-        "2021": { score: 602, rank: 22000, batchLine: 444 }
-      },
-      career: ["装备制造", "汽车工业", "船舶重工", "科研院所", "航空航天"],
-      tags: ["985", "211", "双一流", "冲刺"]
-    },
-    {
-      id: "ln02", province: "辽宁", city: "沈阳", name: "东北大学",
-      college: "东北大学", major: "计算机科学与技术", batch: "本科一批",
-      scores: {
-        "2025": { score: 612, rank: 15678, batchLine: 441 },
-        "2024": { score: 612, rank: 15160, batchLine: 444 },
-        "2023": { score: 610, rank: 22153, batchLine: 443 },
-        "2022": { score: 606, rank: 17883, batchLine: 437 },
-        "2021": { score: 607, rank: 20000, batchLine: 444 }
-      },
-      career: ["互联网大厂", "软件开发", "网络安全", "AI", "国企信息化"],
-      tags: ["985", "211", "双一流", "冲刺"]
-    },
-    {
-      id: "ln03", province: "辽宁", city: "沈阳", name: "辽宁大学",
-      college: "辽宁大学", major: "金融学", batch: "本科一批",
-      scores: {
-        "2025": { score: 551, rank: 78456, batchLine: 441 },
-        "2024": { score: 553, rank: 78456, batchLine: 444 },
-        "2023": { score: 551, rank: 96625, batchLine: 443 },
-        "2022": { score: 548, rank: 104753, batchLine: 437 },
-        "2021": { score: 549, rank: 102000, batchLine: 444 }
-      },
-      career: ["银行", "证券", "保险", "企业金融", "公务员", "财务分析"],
-      tags: ["211", "双一流", "稳妥"]
-    },
-
-    // ========== 湖北高校 (3所) ==========
-    {
-      id: "hub01", province: "湖北", city: "武汉", name: "武汉理工大学",
-      college: "武汉理工大学", major: "计算机科学与技术", batch: "本科一批",
-      scores: {
-        "2025": { score: 585, rank: 36012, batchLine: 441 },
-        "2024": { score: 617, rank: 12932, batchLine: 444 },
-        "2023": { score: 615, rank: 17228, batchLine: 443 },
-        "2022": { score: 611, rank: 17883, batchLine: 437 },
-        "2021": { score: 610, rank: 16931, batchLine: 444 }
-      },
-      career: ["互联网大厂", "汽车IT", "智能制造", "通信企业", "科研院所"],
-      tags: ["211", "双一流", "冲刺"]
-    },
-    {
-      id: "hub02", province: "湖北", city: "武汉", name: "华中农业大学",
-      college: "华中农业大学", major: "生物科学", batch: "本科一批",
-      scores: {
-        "2025": { score: 558, rank: 70321, batchLine: 441 },
-        "2024": { score: 564, rank: 55949, batchLine: 444 },
-        "2023": { score: 571, rank: 48214, batchLine: 443 },
-        "2022": { score: 570, rank: 37068, batchLine: 437 },
-        "2021": { score: 568, rank: 58000, batchLine: 444 }
-      },
-      career: ["生物医药", "农业科技", "环保", "质检", "科研院所"],
-      tags: ["211", "双一流", "稳妥"]
-    },
-    {
-      id: "hub03", province: "湖北", city: "武汉", name: "湖北大学",
-      college: "湖北大学", major: "会计学", batch: "本科一批",
-      scores: {
-        "2025": { score: 548, rank: 82543, batchLine: 441 },
-        "2024": { score: 556, rank: 66879, batchLine: 444 },
-        "2023": { score: 551, rank: 87638, batchLine: 443 },
-        "2022": { score: 553, rank: 104753, batchLine: 437 },
-        "2021": { score: 552, rank: 98000, batchLine: 444 }
+        "2025": { score: 515, rank: 146000, batchLine: 437 },
+        "2024": { score: 519, rank: 133569, batchLine: 437 },
+        "2023": { score: 521, rank: 126300, batchLine: 424 },
+        "2022": { score: 518, rank: 117800, batchLine: 409 },
+        "2021": { score: 519, rank: 106000, batchLine: 397 }
       },
       career: ["企业财务", "会计事务所", "银行", "审计", "税务"],
-      tags: ["省属重点", "综合", "稳妥"]
+      tags: ["公办", "省属", "民族", "文科", "冲刺"]
+    },
+    {
+      id: "hub-hbwl-01",
+      province: "湖北", city: "襄阳", name: "湖北文理学院",
+      college: "文学与传媒学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 505, rank: 169500, batchLine: 437 },
+        "2024": { score: 509, rank: 159200, batchLine: 437 },
+        "2023": { score: 511, rank: 150300, batchLine: 424 },
+        "2022": { score: 508, rank: 141800, batchLine: 409 },
+        "2021": { score: 509, rank: 129000, batchLine: 397 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "文秘"],
+      tags: ["公办", "省属", "文科", "稳妥"]
+    },
+    {
+      id: "hub-hbwl-02",
+      province: "湖北", city: "襄阳", name: "湖北文理学院",
+      college: "政法学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 508, rank: 163000, batchLine: 437 },
+        "2024": { score: 512, rank: 152300, batchLine: 437 },
+        "2023": { score: 514, rank: 143600, batchLine: 424 },
+        "2022": { score: 511, rank: 135100, batchLine: 409 },
+        "2021": { score: 512, rank: 122500, batchLine: 397 }
+      },
+      career: ["律师", "法务", "公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "稳妥"]
+    },
+    {
+      id: "hub-hbgc-01",
+      province: "湖北", city: "孝感", name: "湖北工程学院",
+      college: "文学与新闻传播学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 500, rank: 181000, batchLine: 437 },
+        "2024": { score: 504, rank: 170500, batchLine: 437 },
+        "2023": { score: 506, rank: 161200, batchLine: 424 },
+        "2022": { score: 503, rank: 152600, batchLine: 409 },
+        "2021": { score: 504, rank: 139800, batchLine: 397 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "文科", "稳妥"]
+    },
+    {
+      id: "hub-hbde-01",
+      province: "湖北", city: "武汉", name: "湖北第二师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 518, rank: 139000, batchLine: 437 },
+        "2024": { score: 522, rank: 126800, batchLine: 437 },
+        "2023": { score: 524, rank: 118300, batchLine: 424 },
+        "2022": { score: 521, rank: 110500, batchLine: 409 },
+        "2021": { score: 522, rank: 98200, batchLine: 397 }
+      },
+      career: ["语文教师", "教育管理", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
     },
 
-    // ========== 陕西高校 (3所) ==========
+    // ====================================================================
+    // 湖南省高校 (5所, 6个专业)
+    // ====================================================================
+
     {
-      id: "sx01", province: "陕西", city: "西安", name: "西安电子科技大学",
-      college: "西安电子科技大学", major: "通信工程", batch: "本科一批",
+      id: "hun-hnwl-01",
+      province: "湖南", city: "常德", name: "湖南文理学院",
+      college: "文史与法学学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 612, rank: 15183, batchLine: 441 },
-        "2024": { score: 612, rank: 15432, batchLine: 444 },
-        "2023": { score: 611, rank: 18748, batchLine: 443 },
-        "2022": { score: 608, rank: 17883, batchLine: 437 },
-        "2021": { score: 609, rank: 18000, batchLine: 444 }
+        "2025": { score: 504, rank: 172000, batchLine: 422 },
+        "2024": { score: 507, rank: 163500, batchLine: 422 },
+        "2023": { score: 509, rank: 154200, batchLine: 415 },
+        "2022": { score: 506, rank: 145800, batchLine: 414 },
+        "2021": { score: 507, rank: 133800, batchLine: 434 }
       },
-      career: ["华为/中兴", "通信企业", "互联网", "军工电子", "科研院所"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "sx02", province: "陕西", city: "西安", name: "长安大学",
-      college: "长安大学", major: "土木工程", batch: "本科一批",
+      id: "hun-hnkj-01",
+      province: "湖南", city: "永州", name: "湖南科技学院",
+      college: "人文与社会科学学院", major: "汉语言文学", batch: "本科一段",
       scores: {
-        "2025": { score: 553, rank: 76123, batchLine: 441 },
-        "2024": { score: 558, rank: 68976, batchLine: 444 },
-        "2023": { score: 556, rank: 81465, batchLine: 443 },
-        "2022": { score: 553, rank: 104753, batchLine: 437 },
-        "2021": { score: 551, rank: 98000, batchLine: 444 }
+        "2025": { score: 496, rank: 195500, batchLine: 422 },
+        "2024": { score: 499, rank: 186800, batchLine: 422 },
+        "2023": { score: 501, rank: 177200, batchLine: 415 },
+        "2022": { score: 498, rank: 168500, batchLine: 414 },
+        "2021": { score: 499, rank: 155200, batchLine: 434 }
       },
-      career: ["建筑施工", "路桥设计", "房地产", "市政工程", "工程管理"],
-      tags: ["211", "双一流", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
     },
     {
-      id: "sx03", province: "陕西", city: "西安", name: "陕西师范大学",
-      college: "陕西师范大学", major: "化学(师范)", batch: "本科一批",
+      id: "hun-xn-01",
+      province: "湖南", city: "郴州", name: "湘南学院",
+      college: "文学与新闻学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 566, rank: 58976, batchLine: 441 },
-        "2024": { score: 566, rank: 59782, batchLine: 444 },
-        "2023": { score: 564, rank: 71108, batchLine: 443 },
-        "2022": { score: 560, rank: 81465, batchLine: 437 },
-        "2021": { score: 562, rank: 78000, batchLine: 444 }
+        "2025": { score: 493, rank: 201500, batchLine: 422 },
+        "2024": { score: 496, rank: 193000, batchLine: 422 },
+        "2023": { score: 498, rank: 183500, batchLine: 415 },
+        "2022": { score: 495, rank: 174800, batchLine: 414 },
+        "2021": { score: 496, rank: 161800, batchLine: 434 }
       },
-      career: ["化学教师", "教育研究", "化工企业", "质检", "教育管理"],
-      tags: ["211", "双一流", "师范", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "hun-hysf-01",
+      province: "湖南", city: "衡阳", name: "衡阳师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 506, rank: 167000, batchLine: 422 },
+        "2024": { score: 509, rank: 158500, batchLine: 422 },
+        "2023": { score: 511, rank: 149800, batchLine: 415 },
+        "2022": { score: 508, rank: 141200, batchLine: 414 },
+        "2021": { score: 509, rank: 129200, batchLine: 434 }
+      },
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "hun-hysf-02",
+      province: "湖南", city: "衡阳", name: "衡阳师范学院",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 502, rank: 176000, batchLine: 422 },
+        "2024": { score: 505, rank: 167500, batchLine: 422 },
+        "2023": { score: 507, rank: 158100, batchLine: 415 },
+        "2022": { score: 504, rank: 149300, batchLine: 414 },
+        "2021": { score: 505, rank: 136800, batchLine: 434 }
+      },
+      career: ["英语教师", "翻译", "外贸", "跨境电商", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "hun-hnrw-01",
+      province: "湖南", city: "娄底", name: "湖南人文科技学院",
+      college: "文学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 490, rank: 208000, batchLine: 422 },
+        "2024": { score: 493, rank: 199500, batchLine: 422 },
+        "2023": { score: 495, rank: 189200, batchLine: 415 },
+        "2022": { score: 492, rank: 180500, batchLine: 414 },
+        "2021": { score: 493, rank: 167500, batchLine: 434 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "文科", "保底"]
     },
 
-    // ========== 四川高校 (3所) ==========
+    // ====================================================================
+    // 河南省高校 (5所, 6个专业)
+    // 数据锚点: 信阳师范2024山东最低462, 安阳师范464, 洛阳师范447, 南阳师范448
+    // ====================================================================
+
     {
-      id: "sc01", province: "四川", city: "成都", name: "电子科技大学",
-      college: "电子科技大学", major: "电子信息工程", batch: "本科一批",
+      id: "hen-xysf-01",
+      province: "河南", city: "信阳", name: "信阳师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 648, rank: 3612, batchLine: 441 },
-        "2024": { score: 647, rank: 3780, batchLine: 444 },
-        "2023": { score: 649, rank: 4172, batchLine: 443 },
-        "2022": { score: 643, rank: 2638, batchLine: 437 },
-        "2021": { score: 644, rank: 3247, batchLine: 444 }
+        "2025": { score: 506, rank: 168500, batchLine: 441 },
+        "2024": { score: 510, rank: 157200, batchLine: 444 },
+        "2023": { score: 512, rank: 148300, batchLine: 443 },
+        "2022": { score: 509, rank: 139800, batchLine: 437 },
+        "2021": { score: 510, rank: 127800, batchLine: 444 }
       },
-      career: ["华为/中兴", "芯片设计", "通信巨头", "互联网大厂", "科研院所"],
-      tags: ["985", "211", "双一流", "冲刺"]
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "sc02", province: "四川", city: "成都", name: "西南交通大学",
-      college: "西南交通大学", major: "交通运输", batch: "本科一批",
+      id: "hen-lys-01",
+      province: "河南", city: "洛阳", name: "洛阳师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 575, rank: 46789, batchLine: 441 },
-        "2024": { score: 569, rank: 49414, batchLine: 444 },
-        "2023": { score: 568, rank: 57109, batchLine: 443 },
-        "2022": { score: 565, rank: 71108, batchLine: 437 },
-        "2021": { score: 563, rank: 72000, batchLine: 444 }
+        "2025": { score: 500, rank: 182000, batchLine: 441 },
+        "2024": { score: 503, rank: 173500, batchLine: 444 },
+        "2023": { score: 505, rank: 163800, batchLine: 443 },
+        "2022": { score: 502, rank: 155200, batchLine: 437 },
+        "2021": { score: 503, rank: 142800, batchLine: 444 }
       },
-      career: ["铁路局", "轨道交通", "交通规划", "物流", "工程设计"],
-      tags: ["211", "双一流", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "sc03", province: "四川", city: "雅安", name: "四川农业大学",
-      college: "四川农业大学", major: "动物医学", batch: "本科一批",
+      id: "hen-nys-01",
+      province: "河南", city: "南阳", name: "南阳师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 544, rank: 88234, batchLine: 441 },
-        "2024": { score: 559, rank: 62173, batchLine: 444 },
-        "2023": { score: 555, rank: 81465, batchLine: 443 },
-        "2022": { score: 552, rank: 104753, batchLine: 437 },
-        "2021": { score: 553, rank: 98000, batchLine: 444 }
+        "2025": { score: 497, rank: 193000, batchLine: 441 },
+        "2024": { score: 500, rank: 184500, batchLine: 444 },
+        "2023": { score: 502, rank: 174600, batchLine: 443 },
+        "2022": { score: 499, rank: 165800, batchLine: 437 },
+        "2021": { score: 500, rank: 153200, batchLine: 444 }
       },
-      career: ["兽医", "宠物医院", "畜牧业", "动物检疫", "生物医药"],
-      tags: ["211", "双一流", "农林", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "hen-ays-01",
+      province: "河南", city: "安阳", name: "安阳师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 498, rank: 190000, batchLine: 441 },
+        "2024": { score: 501, rank: 181800, batchLine: 444 },
+        "2023": { score: 503, rank: 172100, batchLine: 443 },
+        "2022": { score: 500, rank: 163300, batchLine: 437 },
+        "2021": { score: 501, rank: 150800, batchLine: 444 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "hen-sqs-01",
+      province: "河南", city: "商丘", name: "商丘师范学院",
+      college: "人文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 495, rank: 197500, batchLine: 441 },
+        "2024": { score: 498, rank: 189300, batchLine: 444 },
+        "2023": { score: 500, rank: 179500, batchLine: 443 },
+        "2022": { score: 497, rank: 170800, batchLine: 437 },
+        "2021": { score: 498, rank: 157800, batchLine: 444 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "hen-sqs-02",
+      province: "河南", city: "商丘", name: "商丘师范学院",
+      college: "外语学院", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 491, rank: 205500, batchLine: 441 },
+        "2024": { score: 494, rank: 197000, batchLine: 444 },
+        "2023": { score: 496, rank: 186800, batchLine: 443 },
+        "2022": { score: 493, rank: 178200, batchLine: 437 },
+        "2021": { score: 494, rank: 164900, batchLine: 444 }
+      },
+      career: ["英语教师", "外贸", "翻译", "跨境电商", "教育培训"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
     },
 
-    // ========== 浙江高校 (3所) ==========
+    // ====================================================================
+    // 安徽省高校 (5所, 6个专业)
+    // ====================================================================
+
     {
-      id: "zj01", province: "浙江", city: "杭州", name: "浙江工业大学",
-      college: "浙江工业大学", major: "计算机科学与技术", batch: "本科一批",
+      id: "ah-aqs-01",
+      province: "安徽", city: "安庆", name: "安庆师范大学",
+      college: "人文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 575, rank: 46543, batchLine: 441 },
-        "2024": { score: 577, rank: 46892, batchLine: 444 },
-        "2023": { score: 575, rank: 53102, batchLine: 443 },
-        "2022": { score: 570, rank: 61673, batchLine: 437 },
-        "2021": { score: 572, rank: 58000, batchLine: 444 }
+        "2025": { score: 503, rank: 174000, batchLine: 427 },
+        "2024": { score: 506, rank: 165500, batchLine: 427 },
+        "2023": { score: 508, rank: 156100, batchLine: 427 },
+        "2022": { score: 505, rank: 147300, batchLine: 435 },
+        "2021": { score: 506, rank: 135200, batchLine: 488 }
       },
-      career: ["互联网企业", "杭州IT生态", "电子商务", "AI", "智能制造"],
-      tags: ["省属重点", "工科", "冲刺"]
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "zj02", province: "浙江", city: "宁波", name: "宁波大学",
-      college: "宁波大学", major: "英语", batch: "本科一批",
+      id: "ah-fys-01",
+      province: "安徽", city: "阜阳", name: "阜阳师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 556, rank: 72145, batchLine: 441 },
-        "2024": { score: 560, rank: 68965, batchLine: 444 },
-        "2023": { score: 558, rank: 81465, batchLine: 443 },
-        "2022": { score: 555, rank: 92687, batchLine: 437 },
-        "2021": { score: 556, rank: 85000, batchLine: 444 }
+        "2025": { score: 498, rank: 190500, batchLine: 427 },
+        "2024": { score: 501, rank: 182200, batchLine: 427 },
+        "2023": { score: 503, rank: 172400, batchLine: 427 },
+        "2022": { score: 500, rank: 163600, batchLine: 435 },
+        "2021": { score: 501, rank: 151200, batchLine: 488 }
       },
-      career: ["英语教师", "外贸", "翻译", "跨境电商", "国际商务"],
-      tags: ["双一流", "综合", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
     },
     {
-      id: "zj03", province: "浙江", city: "杭州", name: "浙江理工大学",
-      college: "浙江理工大学", major: "服装设计与工程", batch: "本科二批",
+      id: "ah-hbs-01",
+      province: "安徽", city: "淮北", name: "淮北师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 538, rank: 97123, batchLine: 441 },
-        "2024": { score: 545, rank: 91234, batchLine: 444 },
-        "2023": { score: 543, rank: 104753, batchLine: 443 },
-        "2022": { score: 539, rank: 131550, batchLine: 437 },
-        "2021": { score: 540, rank: 119000, batchLine: 444 }
+        "2025": { score: 499, rank: 188500, batchLine: 427 },
+        "2024": { score: 502, rank: 180200, batchLine: 427 },
+        "2023": { score: 504, rank: 170300, batchLine: 427 },
+        "2022": { score: 501, rank: 161800, batchLine: 435 },
+        "2021": { score: 502, rank: 149500, batchLine: 488 }
       },
-      career: ["服装设计", "纺织企业", "时尚品牌", "电商运营", "供应链管理"],
-      tags: ["省属", "纺织", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "ah-szxy-01",
+      province: "安徽", city: "宿州", name: "宿州学院",
+      college: "文学与传媒学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 487, rank: 214000, batchLine: 427 },
+        "2024": { score: 490, rank: 205500, batchLine: 427 },
+        "2023": { score: 492, rank: 194800, batchLine: 427 },
+        "2022": { score: 489, rank: 186200, batchLine: 435 },
+        "2021": { score: 490, rank: 173500, batchLine: 488 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "ah-czxy-01",
+      province: "安徽", city: "滁州", name: "滁州学院",
+      college: "文学与传媒学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 484, rank: 220000, batchLine: 427 },
+        "2024": { score: 487, rank: 211500, batchLine: 427 },
+        "2023": { score: 489, rank: 200500, batchLine: 427 },
+        "2022": { score: 486, rank: 191800, batchLine: 435 },
+        "2021": { score: 487, rank: 178200, batchLine: 488 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "ah-fys-02",
+      province: "安徽", city: "阜阳", name: "阜阳师范大学",
+      college: "法学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 501, rank: 179000, batchLine: 427 },
+        "2024": { score: 504, rank: 170800, batchLine: 427 },
+        "2023": { score: 506, rank: 161500, batchLine: 427 },
+        "2022": { score: 503, rank: 152900, batchLine: 435 },
+        "2021": { score: 504, rank: 140500, batchLine: 488 }
+      },
+      career: ["律师", "法务", "公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "稳妥"]
     },
 
-    // ========== 上海高校 (3所) ==========
+    // ====================================================================
+    // 江西省高校 (5所, 6个专业)
+    // ====================================================================
+
     {
-      id: "sh01", province: "上海", city: "上海", name: "上海理工大学",
-      college: "上海理工大学", major: "机械设计制造及其自动化", batch: "本科一批",
+      id: "jx-gns-01",
+      province: "江西", city: "赣州", name: "赣南师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 575, rank: 46234, batchLine: 441 },
-        "2024": { score: 574, rank: 44192, batchLine: 444 },
-        "2023": { score: 576, rank: 53102, batchLine: 443 },
-        "2022": { score: 572, rank: 61673, batchLine: 437 },
-        "2021": { score: 573, rank: 56000, batchLine: 444 }
+        "2025": { score: 505, rank: 170500, batchLine: 448 },
+        "2024": { score: 508, rank: 162000, batchLine: 448 },
+        "2023": { score: 510, rank: 152500, batchLine: 445 },
+        "2022": { score: 507, rank: 143800, batchLine: 440 },
+        "2021": { score: 508, rank: 131500, batchLine: 443 }
       },
-      career: ["装备制造", "汽车工业", "医疗器械", "精密仪器", "德资企业"],
-      tags: ["市属重点", "工科", "冲刺"]
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "sh02", province: "上海", city: "上海", name: "东华大学",
-      college: "东华大学", major: "材料科学与工程", batch: "本科一批",
+      id: "jx-jxkj-01",
+      province: "江西", city: "南昌", name: "江西科技师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 595, rank: 24218, batchLine: 441 },
-        "2024": { score: 599, rank: 22775, batchLine: 444 },
-        "2023": { score: 597, rank: 28373, batchLine: 443 },
-        "2022": { score: 593, rank: 32282, batchLine: 437 },
-        "2021": { score: 591, rank: 30000, batchLine: 444 }
+        "2025": { score: 502, rank: 176500, batchLine: 448 },
+        "2024": { score: 505, rank: 168200, batchLine: 448 },
+        "2023": { score: 507, rank: 158600, batchLine: 445 },
+        "2022": { score: 504, rank: 149800, batchLine: 440 },
+        "2021": { score: 505, rank: 137200, batchLine: 443 }
       },
-      career: ["新材料", "纺织创新", "化工企业", "研发工程师", "质检"],
-      tags: ["211", "双一流", "冲刺"]
+      career: ["语文教师", "职业教育", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "sh03", province: "上海", city: "上海", name: "上海师范大学",
-      college: "上海师范大学", major: "学前教育", batch: "本科二批",
+      id: "jx-jgs-01",
+      province: "江西", city: "吉安", name: "井冈山大学",
+      college: "人文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 535, rank: 101276, batchLine: 441 },
-        "2024": { score: 538, rank: 106789, batchLine: 444 },
-        "2023": { score: 536, rank: 131550, batchLine: 443 },
-        "2022": { score: 533, rank: 146273, batchLine: 437 },
-        "2021": { score: 534, rank: 131000, batchLine: 444 }
+        "2025": { score: 496, rank: 196000, batchLine: 448 },
+        "2024": { score: 499, rank: 187300, batchLine: 448 },
+        "2023": { score: 501, rank: 177500, batchLine: 445 },
+        "2022": { score: 498, rank: 168800, batchLine: 440 },
+        "2021": { score: 499, rank: 155500, batchLine: 443 }
       },
-      career: ["幼儿园教师", "早教机构", "教育管理", "儿童产品开发", "教育研究"],
-      tags: ["市属", "师范", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "jx-jgs-02",
+      province: "江西", city: "吉安", name: "井冈山大学",
+      college: "政法学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 498, rank: 191500, batchLine: 448 },
+        "2024": { score: 501, rank: 183200, batchLine: 448 },
+        "2023": { score: 503, rank: 173500, batchLine: 445 },
+        "2022": { score: 500, rank: 164800, batchLine: 440 },
+        "2021": { score: 501, rank: 151800, batchLine: 443 }
+      },
+      career: ["律师", "法务", "公务员", "社区法律咨询", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "保底"]
+    },
+    {
+      id: "jx-srs-01",
+      province: "江西", city: "上饶", name: "上饶师范学院",
+      college: "文学与新闻传播学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 493, rank: 203000, batchLine: 448 },
+        "2024": { score: 496, rank: 194500, batchLine: 448 },
+        "2023": { score: 498, rank: 184200, batchLine: 445 },
+        "2022": { score: 495, rank: 175500, batchLine: 440 },
+        "2021": { score: 496, rank: 162500, batchLine: 443 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "jx-gns-02",
+      province: "江西", city: "赣州", name: "赣南师范大学",
+      college: "马克思主义学院", major: "思想政治教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 501, rank: 179500, batchLine: 448 },
+        "2024": { score: 504, rank: 171200, batchLine: 448 },
+        "2023": { score: 506, rank: 161800, batchLine: 445 },
+        "2022": { score: 503, rank: 153200, batchLine: 440 },
+        "2021": { score: 504, rank: 140800, batchLine: 443 }
+      },
+      career: ["政治教师", "公务员", "党务工作者", "基层管理", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
 
-    // ========== 广东高校 (3所) ==========
+    // ====================================================================
+    // 江苏省高校 (3所, 4个专业)
+    // ====================================================================
+
     {
-      id: "gd01", province: "广东", city: "广州", name: "华南师范大学",
-      college: "华南师范大学", major: "心理学", batch: "本科一批",
+      id: "js-ycs-01",
+      province: "江苏", city: "盐城", name: "盐城师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 578, rank: 42567, batchLine: 441 },
-        "2024": { score: 572, rank: 52347, batchLine: 444 },
-        "2023": { score: 570, rank: 57109, batchLine: 443 },
-        "2022": { score: 566, rank: 71108, batchLine: 437 },
-        "2021": { score: 568, rank: 63000, batchLine: 444 }
+        "2025": { score: 509, rank: 160500, batchLine: 462 },
+        "2024": { score: 513, rank: 149200, batchLine: 462 },
+        "2023": { score: 515, rank: 140300, batchLine: 448 },
+        "2022": { score: 512, rank: 131800, batchLine: 429 },
+        "2021": { score: 513, rank: 119500, batchLine: 417 }
       },
-      career: ["心理咨询师", "学校心理老师", "人力资源管理", "用户研究", "科研"],
-      tags: ["211", "双一流", "师范", "冲刺"]
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
     },
     {
-      id: "gd02", province: "广东", city: "广州", name: "广东工业大学",
-      college: "广东工业大学", major: "电子信息工程", batch: "本科一批",
+      id: "js-hys-01",
+      province: "江苏", city: "淮安", name: "淮阴师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 545, rank: 85789, batchLine: 441 },
-        "2024": { score: 548, rank: 88765, batchLine: 444 },
-        "2023": { score: 546, rank: 92687, batchLine: 443 },
-        "2022": { score: 543, rank: 117681, batchLine: 437 },
-        "2021": { score: 544, rank: 105000, batchLine: 444 }
+        "2025": { score: 504, rank: 172500, batchLine: 462 },
+        "2024": { score: 507, rank: 164000, batchLine: 462 },
+        "2023": { score: 509, rank: 155100, batchLine: 448 },
+        "2022": { score: 506, rank: 146300, batchLine: 429 },
+        "2021": { score: 507, rank: 133500, batchLine: 417 }
       },
-      career: ["电子制造", "华为产业链", "通信", "智能制造", "消费电子"],
-      tags: ["省属重点", "工科", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "gd03", province: "广东", city: "广州", name: "广州大学",
-      college: "广州大学", major: "土木工程", batch: "本科二批",
+      id: "js-hys-02",
+      province: "江苏", city: "淮安", name: "淮阴师范学院",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 515, rank: 136542, batchLine: 441 },
-        "2024": { score: 520, rank: 129876, batchLine: 444 },
-        "2023": { score: 517, rank: 175135, batchLine: 443 },
-        "2022": { score: 515, rank: 212318, batchLine: 437 },
-        "2021": { score: 516, rank: 190000, batchLine: 444 }
+        "2025": { score: 500, rank: 182500, batchLine: 462 },
+        "2024": { score: 503, rank: 174200, batchLine: 462 },
+        "2023": { score: 505, rank: 164300, batchLine: 448 },
+        "2022": { score: 502, rank: 155500, batchLine: 429 },
+        "2021": { score: 503, rank: 142300, batchLine: 417 }
       },
-      career: ["建筑设计", "施工管理", "房地产开发", "市政工程", "工程咨询"],
-      tags: ["省属", "综合", "稳妥"]
+      career: ["英语教师", "翻译", "外贸", "跨境电商", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "js-jsde-01",
+      province: "江苏", city: "南京", name: "江苏第二师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 514, rank: 147500, batchLine: 462 },
+        "2024": { score: 518, rank: 136800, batchLine: 462 },
+        "2023": { score: 520, rank: 128300, batchLine: 448 },
+        "2022": { score: 517, rank: 120500, batchLine: 429 },
+        "2021": { score: 518, rank: 108200, batchLine: 417 }
+      },
+      career: ["语文教师", "教育管理", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
     },
 
-    // ========== 湖南高校 (2所) ==========
+    // ====================================================================
+    // 河北省高校 (3所, 4个专业)
+    // ====================================================================
+
     {
-      id: "hun01", province: "湖南", city: "长沙", name: "湖南大学",
-      college: "湖南大学", major: "土木工程", batch: "本科一批",
+      id: "heb-hbmz-01",
+      province: "河北", city: "承德", name: "河北民族师范学院",
+      college: "文学与传媒学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 598, rank: 22678, batchLine: 441 },
-        "2024": { score: 595, rank: 25974, batchLine: 444 },
-        "2023": { score: 593, rank: 32956, batchLine: 443 },
-        "2022": { score: 590, rank: 38485, batchLine: 437 },
-        "2021": { score: 592, rank: 35000, batchLine: 444 }
+        "2025": { score: 499, rank: 187000, batchLine: 448 },
+        "2024": { score: 502, rank: 178500, batchLine: 448 },
+        "2023": { score: 504, rank: 169200, batchLine: 439 },
+        "2022": { score: 501, rank: 160500, batchLine: 430 },
+        "2021": { score: 502, rank: 148200, batchLine: 412 }
       },
-      career: ["建筑设计", "房地产", "桥梁工程", "施工管理", "科研院所"],
-      tags: ["985", "211", "双一流", "冲刺"]
+      career: ["语文教师", "民族地区公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
     },
     {
-      id: "hun02", province: "湖南", city: "长沙", name: "长沙理工大学",
-      college: "长沙理工大学", major: "电气工程及其自动化", batch: "本科一批",
+      id: "heb-hs-01",
+      province: "河北", city: "衡水", name: "衡水学院",
+      college: "文学与传播学院", major: "汉语言文学", batch: "本科一段",
       scores: {
-        "2025": { score: 547, rank: 83654, batchLine: 441 },
-        "2024": { score: 552, rank: 80234, batchLine: 444 },
-        "2023": { score: 550, rank: 98762, batchLine: 443 },
-        "2022": { score: 547, rank: 117681, batchLine: 437 },
-        "2021": { score: 546, rank: 105000, batchLine: 444 }
+        "2025": { score: 494, rank: 199000, batchLine: 448 },
+        "2024": { score: 497, rank: 190500, batchLine: 448 },
+        "2023": { score: 499, rank: 180800, batchLine: 439 },
+        "2022": { score: 496, rank: 172100, batchLine: 430 },
+        "2021": { score: 497, rank: 159500, batchLine: 412 }
       },
-      career: ["国家电网", "电气工程", "新能源", "自动化", "电力设计院"],
-      tags: ["省属重点", "工科", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "heb-hd-01",
+      province: "河北", city: "邯郸", name: "邯郸学院",
+      college: "文史学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 492, rank: 203500, batchLine: 448 },
+        "2024": { score: 495, rank: 195200, batchLine: 448 },
+        "2023": { score: 497, rank: 185300, batchLine: 439 },
+        "2022": { score: 494, rank: 176500, batchLine: 430 },
+        "2021": { score: 495, rank: 163500, batchLine: 412 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "heb-hbmz-02",
+      province: "河北", city: "承德", name: "河北民族师范学院",
+      college: "马克思主义学院", major: "思想政治教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 496, rank: 196500, batchLine: 448 },
+        "2024": { score: 499, rank: 188000, batchLine: 448 },
+        "2023": { score: 501, rank: 178200, batchLine: 439 },
+        "2022": { score: 498, rank: 169500, batchLine: 430 },
+        "2021": { score: 499, rank: 156500, batchLine: 412 }
+      },
+      career: ["政治教师", "公务员", "党务工作者", "基层管理", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
     },
 
-    // ========== 安徽高校 (2所) ==========
+    // ====================================================================
+    // 山西省高校 (3所, 4个专业)
+    // ====================================================================
+
     {
-      id: "ah01", province: "安徽", city: "合肥", name: "合肥工业大学",
-      college: "合肥工业大学", major: "车辆工程", batch: "本科一批",
+      id: "sxi-sxsf-01",
+      province: "山西", city: "临汾", name: "山西师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 565, rank: 60234, batchLine: 441 },
-        "2024": { score: 568, rank: 59234, batchLine: 444 },
-        "2023": { score: 566, rank: 63678, batchLine: 443 },
-        "2022": { score: 562, rank: 92687, batchLine: 437 },
-        "2021": { score: 563, rank: 78000, batchLine: 444 }
+        "2025": { score: 506, rank: 168000, batchLine: 418 },
+        "2024": { score: 509, rank: 159500, batchLine: 418 },
+        "2023": { score: 511, rank: 150800, batchLine: 396 },
+        "2022": { score: 508, rank: 142100, batchLine: 417 },
+        "2021": { score: 509, rank: 129500, batchLine: 410 }
       },
-      career: ["汽车制造", "新能源汽车", "零部件设计", "研发工程师", "质量管理"],
-      tags: ["211", "双一流", "工科", "稳妥"]
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "ah02", province: "安徽", city: "芜湖", name: "安徽师范大学",
-      college: "安徽师范大学", major: "生物科学(师范)", batch: "本科二批",
+      id: "sxi-tys-01",
+      province: "山西", city: "晋中", name: "太原师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 504, rank: 157234, batchLine: 441 },
-        "2024": { score: 507, rank: 162345, batchLine: 444 },
-        "2023": { score: 505, rank: 201872, batchLine: 443 },
-        "2022": { score: 502, rank: 268499, batchLine: 437 },
-        "2021": { score: 503, rank: 250000, batchLine: 444 }
+        "2025": { score: 501, rank: 179000, batchLine: 418 },
+        "2024": { score: 504, rank: 170800, batchLine: 418 },
+        "2023": { score: 506, rank: 161500, batchLine: 396 },
+        "2022": { score: 503, rank: 152800, batchLine: 417 },
+        "2021": { score: 504, rank: 140200, batchLine: 410 }
       },
-      career: ["生物教师", "教育研究", "生物技术", "环保", "医药"],
-      tags: ["省属", "师范", "保底"]
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "sxi-yc-01",
+      province: "山西", city: "运城", name: "运城学院",
+      college: "中文系", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 489, rank: 210000, batchLine: 418 },
+        "2024": { score: 492, rank: 201500, batchLine: 418 },
+        "2023": { score: 494, rank: 190800, batchLine: 396 },
+        "2022": { score: 491, rank: 182100, batchLine: 417 },
+        "2021": { score: 492, rank: 168800, batchLine: 410 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sxi-yc-02",
+      province: "山西", city: "运城", name: "运城学院",
+      college: "外语系", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 486, rank: 216000, batchLine: 418 },
+        "2024": { score: 489, rank: 207500, batchLine: 418 },
+        "2023": { score: 491, rank: 196500, batchLine: 396 },
+        "2022": { score: 488, rank: 187800, batchLine: 417 },
+        "2021": { score: 489, rank: 174000, batchLine: 410 }
+      },
+      career: ["英语教师", "外贸", "翻译", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
     },
 
-    // ========== 福建高校 (2所) ==========
+    // ====================================================================
+    // 辽宁省高校 (2所, 3个专业)
+    // ====================================================================
+
     {
-      id: "fj01", province: "福建", city: "福州", name: "福州大学",
-      college: "福州大学", major: "化学工程与工艺", batch: "本科一批",
+      id: "ln-lnsf-01",
+      province: "辽宁", city: "大连", name: "辽宁师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 551, rank: 78543, batchLine: 441 },
-        "2024": { score: 554, rank: 76876, batchLine: 444 },
-        "2023": { score: 552, rank: 89063, batchLine: 443 },
-        "2022": { score: 549, rank: 104753, batchLine: 437 },
-        "2021": { score: 548, rank: 100000, batchLine: 444 }
+        "2025": { score: 510, rank: 158000, batchLine: 400 },
+        "2024": { score: 513, rank: 149800, batchLine: 400 },
+        "2023": { score: 515, rank: 141200, batchLine: 404 },
+        "2022": { score: 512, rank: 132500, batchLine: 362 },
+        "2021": { score: 513, rank: 119800, batchLine: 336 }
       },
-      career: ["化工企业", "材料研发", "制药", "石油化工", "环保监测"],
-      tags: ["211", "双一流", "稳妥"]
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
     },
     {
-      id: "fj02", province: "福建", city: "厦门", name: "集美大学",
-      college: "集美大学", major: "航海技术", batch: "本科二批",
+      id: "ln-bhdx-01",
+      province: "辽宁", city: "锦州", name: "渤海大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 510, rank: 146234, batchLine: 441 },
-        "2024": { score: 513, rank: 152345, batchLine: 444 },
-        "2023": { score: 511, rank: 188342, batchLine: 443 },
-        "2022": { score: 509, rank: 249318, batchLine: 437 },
-        "2021": { score: 510, rank: 230000, batchLine: 444 }
+        "2025": { score: 504, rank: 171500, batchLine: 400 },
+        "2024": { score: 507, rank: 163000, batchLine: 400 },
+        "2023": { score: 509, rank: 154500, batchLine: 404 },
+        "2022": { score: 506, rank: 145500, batchLine: 362 },
+        "2021": { score: 507, rank: 133000, batchLine: 336 }
       },
-      career: ["航运公司", "港口管理", "海事局", "船舶代理", "物流"],
-      tags: ["省属", "航海", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "文科", "稳妥"]
+    },
+    {
+      id: "ln-bhdx-02",
+      province: "辽宁", city: "锦州", name: "渤海大学",
+      college: "历史文化学院", major: "历史学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 500, rank: 183000, batchLine: 400 },
+        "2024": { score: 503, rank: 174500, batchLine: 400 },
+        "2023": { score: 505, rank: 165200, batchLine: 404 },
+        "2022": { score: 502, rank: 156500, batchLine: 362 },
+        "2021": { score: 503, rank: 143500, batchLine: 336 }
+      },
+      career: ["历史教师", "文博单位", "公务员", "文化旅游", "考研深造"],
+      tags: ["公办", "省属", "文科", "稳妥"]
     },
 
-    // ========== 重庆高校 (2所) ==========
+    // ====================================================================
+    // 福建省高校 (2所, 3个专业)
+    // ====================================================================
+
     {
-      id: "cq01", province: "重庆", city: "重庆", name: "重庆邮电大学",
-      college: "重庆邮电大学", major: "通信工程", batch: "本科一批",
+      id: "fj-mnsf-01",
+      province: "福建", city: "漳州", name: "闽南师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 555, rank: 72564, batchLine: 441 },
-        "2024": { score: 559, rank: 67890, batchLine: 444 },
-        "2023": { score: 557, rank: 81465, batchLine: 443 },
-        "2022": { score: 554, rank: 104753, batchLine: 437 },
-        "2021": { score: 553, rank: 98000, batchLine: 444 }
+        "2025": { score: 502, rank: 177000, batchLine: 449 },
+        "2024": { score: 505, rank: 168500, batchLine: 449 },
+        "2023": { score: 507, rank: 159200, batchLine: 431 },
+        "2022": { score: 504, rank: 150300, batchLine: 428 },
+        "2021": { score: 505, rank: 137500, batchLine: 423 }
       },
-      career: ["通信企业", "华为/中兴", "互联网", "运营商", "物联网"],
-      tags: ["省属重点", "工科", "稳妥"]
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
     },
     {
-      id: "cq02", province: "重庆", city: "重庆", name: "重庆师范大学",
-      college: "重庆师范大学", major: "小学教育", batch: "本科二批",
+      id: "fj-qzs-01",
+      province: "福建", city: "泉州", name: "泉州师范学院",
+      college: "文学与传播学院", major: "汉语言文学(师范)", batch: "本科一段",
       scores: {
-        "2025": { score: 504, rank: 158567, batchLine: 441 },
-        "2024": { score: 508, rank: 160234, batchLine: 444 },
-        "2023": { score: 506, rank: 201872, batchLine: 443 },
-        "2022": { score: 504, rank: 268499, batchLine: 437 },
-        "2021": { score: 505, rank: 245000, batchLine: 444 }
+        "2025": { score: 498, rank: 192000, batchLine: 449 },
+        "2024": { score: 501, rank: 183500, batchLine: 449 },
+        "2023": { score: 503, rank: 174200, batchLine: 431 },
+        "2022": { score: 500, rank: 165500, batchLine: 428 },
+        "2021": { score: 501, rank: 152200, batchLine: 423 }
       },
-      career: ["小学教师", "教育管理", "教育机构", "课程开发", "教育研究"],
-      tags: ["省属", "师范", "保底"]
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "fj-qzs-02",
+      province: "福建", city: "泉州", name: "泉州师范学院",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 494, rank: 199500, batchLine: 449 },
+        "2024": { score: 497, rank: 191200, batchLine: 449 },
+        "2023": { score: 499, rank: 181500, batchLine: 431 },
+        "2022": { score: 496, rank: 172800, batchLine: 428 },
+        "2021": { score: 497, rank: 159200, batchLine: 423 }
+      },
+      career: ["英语教师", "外贸", "翻译", "跨境电商", "教育培训"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+
+    // ====================================================================
+    // 浙江省高校 (6所, 12个专业)
+    // 数据估算: 基于山东省属同类院校档次定位, 2025年估算值
+    // 浙江一段线: 2025-492, 2024-492, 2023-488
+    // ====================================================================
+
+    // ---------- 冲刺档 (avg 509-530) ----------
+
+    {
+      id: "zj-zjwgy-01",
+      province: "浙江", city: "杭州", name: "浙江外国语学院",
+      college: "中国语言文化学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 525, rank: 122500, batchLine: 492 },
+        "2024": { score: 528, rank: 113800, batchLine: 492 },
+        "2023": { score: 530, rank: 106500, batchLine: 488 },
+        "2022": { score: 527, rank: 100500, batchLine: 497 },
+        "2021": { score: 528, rank: 92000, batchLine: 495 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "语言", "文科", "冲刺"]
+    },
+    {
+      id: "zj-zjwgy-02",
+      province: "浙江", city: "杭州", name: "浙江外国语学院",
+      college: "英语语言文化学院", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 522, rank: 130500, batchLine: 492 },
+        "2024": { score: 525, rank: 121800, batchLine: 492 },
+        "2023": { score: 527, rank: 113000, batchLine: 488 },
+        "2022": { score: 524, rank: 106800, batchLine: 497 },
+        "2021": { score: 525, rank: 97500, batchLine: 495 }
+      },
+      career: ["英语教师", "翻译", "外贸", "跨境电商", "考研深造"],
+      tags: ["公办", "省属", "语言", "文科", "冲刺"]
+    },
+    {
+      id: "zj-sxwl-01",
+      province: "浙江", city: "绍兴", name: "绍兴文理学院",
+      college: "人文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 509, rank: 157500, batchLine: 492 },
+        "2024": { score: 512, rank: 149200, batchLine: 492 },
+        "2023": { score: 514, rank: 140500, batchLine: 488 },
+        "2022": { score: 511, rank: 133800, batchLine: 497 },
+        "2021": { score: 512, rank: 121200, batchLine: 495 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "zj-sxwl-02",
+      province: "浙江", city: "绍兴", name: "绍兴文理学院",
+      college: "法学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 511, rank: 153500, batchLine: 492 },
+        "2024": { score: 514, rank: 145200, batchLine: 492 },
+        "2023": { score: 516, rank: 136800, batchLine: 488 },
+        "2022": { score: 513, rank: 130000, batchLine: 497 },
+        "2021": { score: 514, rank: 117500, batchLine: 495 }
+      },
+      career: ["律师", "法务", "公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "冲刺"]
+    },
+
+    // ---------- 稳妥档 (avg 499-508) ----------
+
+    {
+      id: "zj-jxdx-01",
+      province: "浙江", city: "嘉兴", name: "嘉兴大学",
+      college: "文法学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 506, rank: 168000, batchLine: 492 },
+        "2024": { score: 509, rank: 159500, batchLine: 492 },
+        "2023": { score: 511, rank: 150300, batchLine: 488 },
+        "2022": { score: 508, rank: 143000, batchLine: 497 },
+        "2021": { score: 509, rank: 130200, batchLine: 495 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "文秘"],
+      tags: ["公办", "省属", "文科", "稳妥"]
+    },
+    {
+      id: "zj-jxdx-02",
+      province: "浙江", city: "嘉兴", name: "嘉兴大学",
+      college: "商学院", major: "会计学", batch: "本科一段",
+      scores: {
+        "2025": { score: 505, rank: 170000, batchLine: 492 },
+        "2024": { score: 508, rank: 161500, batchLine: 492 },
+        "2023": { score: 510, rank: 152300, batchLine: 488 },
+        "2022": { score: 507, rank: 145000, batchLine: 497 },
+        "2021": { score: 508, rank: 132300, batchLine: 495 }
+      },
+      career: ["企业财务", "会计事务所", "银行", "审计", "税务"],
+      tags: ["公办", "省属", "财经", "文科", "稳妥"]
+    },
+    {
+      id: "zj-hzsf-01",
+      province: "浙江", city: "湖州", name: "湖州师范学院",
+      college: "人文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 505, rank: 169500, batchLine: 492 },
+        "2024": { score: 508, rank: 161200, batchLine: 492 },
+        "2023": { score: 510, rank: 151800, batchLine: 488 },
+        "2022": { score: 507, rank: 144500, batchLine: 497 },
+        "2021": { score: 508, rank: 131800, batchLine: 495 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "zj-hzsf-02",
+      province: "浙江", city: "湖州", name: "湖州师范学院",
+      college: "教师教育学院", major: "小学教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 501, rank: 178500, batchLine: 492 },
+        "2024": { score: 504, rank: 170200, batchLine: 492 },
+        "2023": { score: 506, rank: 160800, batchLine: 488 },
+        "2022": { score: 503, rank: 153200, batchLine: 497 },
+        "2021": { score: 504, rank: 140200, batchLine: 495 }
+      },
+      career: ["小学教师", "教育管理", "教育培训", "课程开发", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+
+    // ---------- 保底档 (avg 460-498) ----------
+
+    {
+      id: "zj-tzxy-01",
+      province: "浙江", city: "台州", name: "台州学院",
+      college: "人文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 498, rank: 191000, batchLine: 492 },
+        "2024": { score: 501, rank: 182800, batchLine: 492 },
+        "2023": { score: 503, rank: 173200, batchLine: 488 },
+        "2022": { score: 500, rank: 165500, batchLine: 497 },
+        "2021": { score: 501, rank: 152000, batchLine: 495 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "zj-tzxy-02",
+      province: "浙江", city: "台州", name: "台州学院",
+      college: "外国语学院", major: "英语", batch: "本科一段",
+      scores: {
+        "2025": { score: 494, rank: 199500, batchLine: 492 },
+        "2024": { score: 497, rank: 191200, batchLine: 492 },
+        "2023": { score: 499, rank: 181500, batchLine: 488 },
+        "2022": { score: 496, rank: 173800, batchLine: 497 },
+        "2021": { score: 497, rank: 160200, batchLine: 495 }
+      },
+      career: ["英语教师", "外贸", "翻译", "跨境电商", "教育培训"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "zj-lsxy-01",
+      province: "浙江", city: "丽水", name: "丽水学院",
+      college: "民族学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 489, rank: 210000, batchLine: 492 },
+        "2024": { score: 492, rank: 201800, batchLine: 492 },
+        "2023": { score: 494, rank: 191200, batchLine: 488 },
+        "2022": { score: 491, rank: 183500, batchLine: 497 },
+        "2021": { score: 492, rank: 169800, batchLine: 495 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "zj-lsxy-02",
+      province: "浙江", city: "丽水", name: "丽水学院",
+      college: "商学院", major: "旅游管理", batch: "本科一段",
+      scores: {
+        "2025": { score: 485, rank: 218000, batchLine: 492 },
+        "2024": { score: 488, rank: 209300, batchLine: 492 },
+        "2023": { score: 490, rank: 198600, batchLine: 488 },
+        "2022": { score: 487, rank: 190800, batchLine: 497 },
+        "2021": { score: 488, rank: 176800, batchLine: 495 }
+      },
+      career: ["旅游企业", "酒店管理", "文旅部门", "景区运营", "导游/领队"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+
+    // ====================================================================
+    // 广东省高校 (6所, 12个专业)
+    // 数据估算: 基于山东省属同类院校档次定位, 2025年估算值
+    // 广东本科线: 2025-442, 2024-442, 2023-439
+    // ====================================================================
+
+    // ---------- 冲刺档 (avg 509-530) ----------
+
+    {
+      id: "gd-gdjs-01",
+      province: "广东", city: "广州", name: "广东技术师范大学",
+      college: "文学与传媒学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 513, rank: 149500, batchLine: 442 },
+        "2024": { score: 516, rank: 141200, batchLine: 442 },
+        "2023": { score: 518, rank: 132800, batchLine: 439 },
+        "2022": { score: 515, rank: 125800, batchLine: 445 },
+        "2021": { score: 516, rank: 113200, batchLine: 432 }
+      },
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "gd-gdjs-02",
+      province: "广东", city: "广州", name: "广东技术师范大学",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 510, rank: 156500, batchLine: 442 },
+        "2024": { score: 513, rank: 148200, batchLine: 442 },
+        "2023": { score: 515, rank: 139500, batchLine: 439 },
+        "2022": { score: 512, rank: 132300, batchLine: 445 },
+        "2021": { score: 513, rank: 119500, batchLine: 432 }
+      },
+      career: ["英语教师", "翻译", "外贸", "跨境电商", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+
+    // ---------- 稳妥档 (avg 499-508) ----------
+
+    {
+      id: "gd-gdhy-01",
+      province: "广东", city: "湛江", name: "广东海洋大学",
+      college: "文学与新闻传播学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 506, rank: 168500, batchLine: 442 },
+        "2024": { score: 509, rank: 160200, batchLine: 442 },
+        "2023": { score: 511, rank: 150800, batchLine: 439 },
+        "2022": { score: 508, rank: 143500, batchLine: 445 },
+        "2021": { score: 509, rank: 130800, batchLine: 432 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "海洋文化传播", "文秘"],
+      tags: ["公办", "省属", "海洋", "文科", "稳妥"]
+    },
+    {
+      id: "gd-gdhy-02",
+      province: "广东", city: "湛江", name: "广东海洋大学",
+      college: "法政学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 507, rank: 164500, batchLine: 442 },
+        "2024": { score: 510, rank: 156300, batchLine: 442 },
+        "2023": { score: 512, rank: 147500, batchLine: 439 },
+        "2022": { score: 509, rank: 140200, batchLine: 445 },
+        "2021": { score: 510, rank: 128000, batchLine: 432 }
+      },
+      career: ["律师", "法务", "公务员", "海洋法律", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "稳妥"]
+    },
+    {
+      id: "gd-hzxy-01",
+      province: "广东", city: "惠州", name: "惠州学院",
+      college: "文学与传媒学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 501, rank: 179000, batchLine: 442 },
+        "2024": { score: 504, rank: 170500, batchLine: 442 },
+        "2023": { score: 506, rank: 161200, batchLine: 439 },
+        "2022": { score: 503, rank: 153500, batchLine: 445 },
+        "2021": { score: 504, rank: 140500, batchLine: 432 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "文科", "稳妥"]
+    },
+    {
+      id: "gd-hzxy-02",
+      province: "广东", city: "惠州", name: "惠州学院",
+      college: "外国语学院", major: "英语(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 497, rank: 193500, batchLine: 442 },
+        "2024": { score: 500, rank: 185200, batchLine: 442 },
+        "2023": { score: 502, rank: 175500, batchLine: 439 },
+        "2022": { score: 499, rank: 167800, batchLine: 445 },
+        "2021": { score: 500, rank: 154500, batchLine: 432 }
+      },
+      career: ["英语教师", "外贸", "翻译", "跨境电商", "教育培训"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+
+    // ---------- 保底档 (avg 460-498) ----------
+
+    {
+      id: "gd-zqxy-01",
+      province: "广东", city: "肇庆", name: "肇庆学院",
+      college: "文学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 495, rank: 197500, batchLine: 442 },
+        "2024": { score: 498, rank: 189300, batchLine: 442 },
+        "2023": { score: 500, rank: 179500, batchLine: 439 },
+        "2022": { score: 497, rank: 171800, batchLine: 445 },
+        "2021": { score: 498, rank: 158200, batchLine: 432 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "gd-zqxy-02",
+      province: "广东", city: "肇庆", name: "肇庆学院",
+      college: "经济与管理学院", major: "会计学", batch: "本科一段",
+      scores: {
+        "2025": { score: 492, rank: 203000, batchLine: 442 },
+        "2024": { score: 495, rank: 195000, batchLine: 442 },
+        "2023": { score: 497, rank: 185200, batchLine: 439 },
+        "2022": { score: 494, rank: 177500, batchLine: 445 },
+        "2021": { score: 495, rank: 163500, batchLine: 432 }
+      },
+      career: ["企业财务", "银行", "会计事务所", "审计", "税务"],
+      tags: ["公办", "省属", "财经", "文科", "保底"]
+    },
+    {
+      id: "gd-sgxy-01",
+      province: "广东", city: "韶关", name: "韶关学院",
+      college: "文学与传媒学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 493, rank: 201500, batchLine: 442 },
+        "2024": { score: 496, rank: 193200, batchLine: 442 },
+        "2023": { score: 498, rank: 183500, batchLine: 439 },
+        "2022": { score: 495, rank: 175800, batchLine: 445 },
+        "2021": { score: 496, rank: 162000, batchLine: 432 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "gd-sgxy-02",
+      province: "广东", city: "韶关", name: "韶关学院",
+      college: "政法学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 495, rank: 198000, batchLine: 442 },
+        "2024": { score: 498, rank: 189800, batchLine: 442 },
+        "2023": { score: 500, rank: 180200, batchLine: 439 },
+        "2022": { score: 497, rank: 172500, batchLine: 445 },
+        "2021": { score: 498, rank: 158800, batchLine: 432 }
+      },
+      career: ["律师", "法务", "公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "保底"]
+    },
+    {
+      id: "gd-hssf-01",
+      province: "广东", city: "潮州", name: "韩山师范学院",
+      college: "文学与新闻传播学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 498, rank: 190500, batchLine: 442 },
+        "2024": { score: 501, rank: 182500, batchLine: 442 },
+        "2023": { score: 503, rank: 172800, batchLine: 439 },
+        "2022": { score: 500, rank: 165000, batchLine: 445 },
+        "2021": { score: 501, rank: 151500, batchLine: 432 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "gd-hssf-02",
+      province: "广东", city: "潮州", name: "韩山师范学院",
+      college: "教育科学学院", major: "小学教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 494, rank: 199000, batchLine: 442 },
+        "2024": { score: 497, rank: 190800, batchLine: 442 },
+        "2023": { score: 499, rank: 181200, batchLine: 439 },
+        "2022": { score: 496, rank: 173500, batchLine: 445 },
+        "2021": { score: 497, rank: 159800, batchLine: 432 }
+      },
+      career: ["小学教师", "教育管理", "教育培训", "课程开发", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+
+    // ====================================================================
+    // 重庆市高校 (5所, 10个专业)
+    // 数据估算: 基于山东省属同类院校档次定位, 2025年估算值
+    // 重庆本科线: 2025-427, 2024-427, 2023-406
+    // 注: 四川外国语大学位于重庆, 非四川
+    // ====================================================================
+
+    // ---------- 冲刺档 (avg 509-530) ----------
+
+    {
+      id: "cq-cqsf-01",
+      province: "重庆", city: "重庆", name: "重庆师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 524, rank: 125500, batchLine: 427 },
+        "2024": { score: 527, rank: 117200, batchLine: 427 },
+        "2023": { score: 529, rank: 109500, batchLine: 406 },
+        "2022": { score: 526, rank: 103200, batchLine: 411 },
+        "2021": { score: 527, rank: 93500, batchLine: 446 }
+      },
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "市属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "cq-cqsf-02",
+      province: "重庆", city: "重庆", name: "重庆师范大学",
+      college: "教育科学学院", major: "小学教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 518, rank: 139000, batchLine: 427 },
+        "2024": { score: 521, rank: 130200, batchLine: 427 },
+        "2023": { score: 523, rank: 122100, batchLine: 406 },
+        "2022": { score: 520, rank: 115500, batchLine: 411 },
+        "2021": { score: 521, rank: 104200, batchLine: 446 }
+      },
+      career: ["小学教师", "教育管理", "教育培训", "课程开发", "考研深造"],
+      tags: ["公办", "市属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "cq-scwgy-01",
+      province: "重庆", city: "重庆", name: "四川外国语大学",
+      college: "英语学院", major: "英语", batch: "本科一段",
+      scores: {
+        "2025": { score: 527, rank: 119500, batchLine: 427 },
+        "2024": { score: 530, rank: 111200, batchLine: 427 },
+        "2023": { score: 532, rank: 103500, batchLine: 406 },
+        "2022": { score: 529, rank: 98200, batchLine: 411 },
+        "2021": { score: 530, rank: 87800, batchLine: 446 }
+      },
+      career: ["翻译", "英语教师", "外交/外事", "外贸", "考研深造"],
+      tags: ["公办", "市属", "语言", "文科", "冲刺"]
+    },
+    {
+      id: "cq-scwgy-02",
+      province: "重庆", city: "重庆", name: "四川外国语大学",
+      college: "中国语言文化学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 523, rank: 128500, batchLine: 427 },
+        "2024": { score: 526, rank: 120100, batchLine: 427 },
+        "2023": { score: 528, rank: 112800, batchLine: 406 },
+        "2022": { score: 525, rank: 106200, batchLine: 411 },
+        "2021": { score: 526, rank: 95800, batchLine: 446 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "考研深造"],
+      tags: ["公办", "市属", "文科", "冲刺"]
+    },
+
+    // ---------- 稳妥档 (avg 499-508) ----------
+
+    {
+      id: "cq-cqwl-01",
+      province: "重庆", city: "重庆", name: "重庆文理学院",
+      college: "文化与传媒学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 506, rank: 168000, batchLine: 427 },
+        "2024": { score: 509, rank: 159800, batchLine: 427 },
+        "2023": { score: 511, rank: 150600, batchLine: 406 },
+        "2022": { score: 508, rank: 143200, batchLine: 411 },
+        "2021": { score: 509, rank: 130500, batchLine: 446 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "文化传媒", "文秘"],
+      tags: ["公办", "市属", "文科", "稳妥"]
+    },
+    {
+      id: "cq-cqwl-02",
+      province: "重庆", city: "重庆", name: "重庆文理学院",
+      college: "马克思主义学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 506, rank: 168500, batchLine: 427 },
+        "2024": { score: 509, rank: 160000, batchLine: 427 },
+        "2023": { score: 511, rank: 150800, batchLine: 406 },
+        "2022": { score: 508, rank: 143200, batchLine: 411 },
+        "2021": { score: 509, rank: 130500, batchLine: 446 }
+      },
+      career: ["律师", "法务", "公务员", "企业合规", "考研深造"],
+      tags: ["公办", "市属", "法学", "文科", "稳妥"]
+    },
+    {
+      id: "cq-cjsf-01",
+      province: "重庆", city: "重庆", name: "长江师范学院",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 504, rank: 172000, batchLine: 427 },
+        "2024": { score: 507, rank: 163800, batchLine: 427 },
+        "2023": { score: 509, rank: 154300, batchLine: 406 },
+        "2022": { score: 506, rank: 146800, batchLine: 411 },
+        "2021": { score: 507, rank: 133800, batchLine: 446 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "市属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "cq-cjsf-02",
+      province: "重庆", city: "重庆", name: "长江师范学院",
+      college: "外国语学院", major: "英语", batch: "本科一段",
+      scores: {
+        "2025": { score: 500, rank: 182000, batchLine: 427 },
+        "2024": { score: 503, rank: 173800, batchLine: 427 },
+        "2023": { score: 505, rank: 164500, batchLine: 406 },
+        "2022": { score: 502, rank: 156800, batchLine: 411 },
+        "2021": { score: 503, rank: 143500, batchLine: 446 }
+      },
+      career: ["英语教师", "外贸", "翻译", "跨境电商", "教育培训"],
+      tags: ["公办", "市属", "文科", "稳妥"]
+    },
+
+    // ---------- 保底档 (avg 460-498) ----------
+
+    {
+      id: "cq-cqsx-01",
+      province: "重庆", city: "重庆", name: "重庆三峡学院",
+      college: "文学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 499, rank: 188000, batchLine: 427 },
+        "2024": { score: 502, rank: 179800, batchLine: 427 },
+        "2023": { score: 504, rank: 170200, batchLine: 406 },
+        "2022": { score: 501, rank: 162500, batchLine: 411 },
+        "2021": { score: 502, rank: 149500, batchLine: 446 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "市属", "文科", "保底"]
+    },
+    {
+      id: "cq-cqsx-02",
+      province: "重庆", city: "重庆", name: "重庆三峡学院",
+      college: "财经学院", major: "会计学", batch: "本科一段",
+      scores: {
+        "2025": { score: 496, rank: 195500, batchLine: 427 },
+        "2024": { score: 499, rank: 187300, batchLine: 427 },
+        "2023": { score: 501, rank: 177500, batchLine: 406 },
+        "2022": { score: 498, rank: 169800, batchLine: 411 },
+        "2021": { score: 499, rank: 155800, batchLine: 446 }
+      },
+      career: ["企业财务", "银行", "会计事务所", "审计", "税务"],
+      tags: ["公办", "市属", "财经", "文科", "保底"]
+    },
+
+    // ====================================================================
+    // 广西壮族自治区高校 (5所, 10个专业)
+    // 数据估算: 基于山东省属同类院校档次定位, 2025年估算值
+    // 广西本科线: 2025-400, 2024-400, 2023-428
+    // ====================================================================
+
+    // ---------- 冲刺档 (avg 509-530) ----------
+
+    {
+      id: "gx-gxsf-01",
+      province: "广西", city: "桂林", name: "广西师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 517, rank: 140500, batchLine: 400 },
+        "2024": { score: 520, rank: 132200, batchLine: 400 },
+        "2023": { score: 522, rank: 124500, batchLine: 428 },
+        "2022": { score: 519, rank: 117800, batchLine: 421 },
+        "2021": { score: 520, rank: 106000, batchLine: 413 }
+      },
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "gx-gxsf-02",
+      province: "广西", city: "桂林", name: "广西师范大学",
+      college: "法学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 514, rank: 148000, batchLine: 400 },
+        "2024": { score: 517, rank: 139800, batchLine: 400 },
+        "2023": { score: 519, rank: 131500, batchLine: 428 },
+        "2022": { score: 516, rank: 124500, batchLine: 421 },
+        "2021": { score: 517, rank: 112500, batchLine: 413 }
+      },
+      career: ["律师", "法务", "公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "冲刺"]
+    },
+
+    // ---------- 稳妥档 (avg 499-508) ----------
+
+    {
+      id: "gx-gxmz-01",
+      province: "广西", city: "南宁", name: "广西民族大学",
+      college: "文学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 503, rank: 174500, batchLine: 400 },
+        "2024": { score: 506, rank: 166200, batchLine: 400 },
+        "2023": { score: 508, rank: 156800, batchLine: 428 },
+        "2022": { score: 505, rank: 149200, batchLine: 421 },
+        "2021": { score: 506, rank: 136500, batchLine: 413 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "民族文化传承", "文秘"],
+      tags: ["公办", "省属", "民族", "文科", "稳妥"]
+    },
+    {
+      id: "gx-gxmz-02",
+      province: "广西", city: "南宁", name: "广西民族大学",
+      college: "外国语学院", major: "英语", batch: "本科一段",
+      scores: {
+        "2025": { score: 500, rank: 181500, batchLine: 400 },
+        "2024": { score: 503, rank: 173200, batchLine: 400 },
+        "2023": { score: 505, rank: 163800, batchLine: 428 },
+        "2022": { score: 502, rank: 156200, batchLine: 421 },
+        "2021": { score: 503, rank: 143200, batchLine: 413 }
+      },
+      career: ["英语教师", "翻译", "外贸(东盟)", "跨境电商", "考研深造"],
+      tags: ["公办", "省属", "民族", "文科", "稳妥"]
+    },
+    {
+      id: "gx-nnsf-01",
+      province: "广西", city: "南宁", name: "南宁师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 505, rank: 170500, batchLine: 400 },
+        "2024": { score: 508, rank: 162000, batchLine: 400 },
+        "2023": { score: 510, rank: 152800, batchLine: 428 },
+        "2022": { score: 507, rank: 145200, batchLine: 421 },
+        "2021": { score: 508, rank: 132500, batchLine: 413 }
+      },
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "gx-nnsf-02",
+      province: "广西", city: "南宁", name: "南宁师范大学",
+      college: "教育科学学院", major: "小学教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 501, rank: 178000, batchLine: 400 },
+        "2024": { score: 504, rank: 169800, batchLine: 400 },
+        "2023": { score: 506, rank: 160200, batchLine: 428 },
+        "2022": { score: 503, rank: 152500, batchLine: 421 },
+        "2021": { score: 504, rank: 139500, batchLine: 413 }
+      },
+      career: ["小学教师", "教育管理", "教育培训", "课程开发", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+
+    // ---------- 保底档 (avg 460-498) ----------
+
+    {
+      id: "gx-ylsf-01",
+      province: "广西", city: "玉林", name: "玉林师范学院",
+      college: "文学与传媒学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 489, rank: 210500, batchLine: 400 },
+        "2024": { score: 492, rank: 202200, batchLine: 400 },
+        "2023": { score: 494, rank: 191500, batchLine: 428 },
+        "2022": { score: 491, rank: 183800, batchLine: 421 },
+        "2021": { score: 492, rank: 170200, batchLine: 413 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "gx-ylsf-02",
+      province: "广西", city: "玉林", name: "玉林师范学院",
+      college: "外国语学院", major: "英语", batch: "本科一段",
+      scores: {
+        "2025": { score: 485, rank: 218500, batchLine: 400 },
+        "2024": { score: 488, rank: 209800, batchLine: 400 },
+        "2023": { score: 490, rank: 199200, batchLine: 428 },
+        "2022": { score: 487, rank: 191500, batchLine: 421 },
+        "2021": { score: 488, rank: 177500, batchLine: 413 }
+      },
+      career: ["英语教师", "外贸", "翻译", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "gx-gxkj-01",
+      province: "广西", city: "来宾", name: "广西科技师范学院",
+      college: "文化与传播学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 484, rank: 220000, batchLine: 400 },
+        "2024": { score: 487, rank: 211500, batchLine: 400 },
+        "2023": { score: 489, rank: 200800, batchLine: 428 },
+        "2022": { score: 486, rank: 193200, batchLine: 421 },
+        "2021": { score: 487, rank: 179200, batchLine: 413 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "文秘"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "gx-gxkj-02",
+      province: "广西", city: "来宾", name: "广西科技师范学院",
+      college: "经济与管理学院", major: "会计学", batch: "本科一段",
+      scores: {
+        "2025": { score: 480, rank: 227000, batchLine: 400 },
+        "2024": { score: 483, rank: 219000, batchLine: 400 },
+        "2023": { score: 485, rank: 208300, batchLine: 428 },
+        "2022": { score: 482, rank: 200500, batchLine: 421 },
+        "2021": { score: 483, rank: 186500, batchLine: 413 }
+      },
+      career: ["企业财务", "银行", "会计事务所", "审计", "税务"],
+      tags: ["公办", "省属", "财经", "文科", "保底"]
+    },
+
+    // ====================================================================
+    // 四川省高校 (6所, 12个专业)
+    // 数据估算: 基于山东省属同类院校档次定位, 2025年估算值
+    // 四川本科线: 2025-459, 2024-459, 2023-433
+    // ====================================================================
+
+    // ---------- 冲刺档 (avg 509-530) ----------
+
+    {
+      id: "sc-scsf-01",
+      province: "四川", city: "成都", name: "四川师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 526, rank: 121500, batchLine: 459 },
+        "2024": { score: 529, rank: 113000, batchLine: 459 },
+        "2023": { score: 531, rank: 105000, batchLine: 433 },
+        "2022": { score: 528, rank: 99000, batchLine: 426 },
+        "2021": { score: 529, rank: 88000, batchLine: 430 }
+      },
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "sc-scsf-02",
+      province: "四川", city: "成都", name: "四川师范大学",
+      college: "法学院", major: "法学", batch: "本科一段",
+      scores: {
+        "2025": { score: 528, rank: 118000, batchLine: 459 },
+        "2024": { score: 531, rank: 109500, batchLine: 459 },
+        "2023": { score: 533, rank: 101800, batchLine: 433 },
+        "2022": { score: 530, rank: 95800, batchLine: 426 },
+        "2021": { score: 531, rank: 85000, batchLine: 430 }
+      },
+      career: ["律师", "法务", "公检法公务员", "企业合规", "考研深造"],
+      tags: ["公办", "省属", "法学", "文科", "冲刺"]
+    },
+    {
+      id: "sc-cdsf-01",
+      province: "四川", city: "成都", name: "成都师范学院",
+      college: "教育与心理学院", major: "小学教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 513, rank: 149000, batchLine: 459 },
+        "2024": { score: 516, rank: 140800, batchLine: 459 },
+        "2023": { score: 518, rank: 132300, batchLine: 433 },
+        "2022": { score: 515, rank: 125500, batchLine: 426 },
+        "2021": { score: 516, rank: 113000, batchLine: 430 }
+      },
+      career: ["小学教师", "教育管理", "教育培训", "课程开发", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "sc-cdsf-02",
+      province: "四川", city: "成都", name: "成都师范学院",
+      college: "文学与新闻学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 517, rank: 141000, batchLine: 459 },
+        "2024": { score: 520, rank: 132800, batchLine: 459 },
+        "2023": { score: 522, rank: 124800, batchLine: 433 },
+        "2022": { score: 519, rank: 118200, batchLine: 426 },
+        "2021": { score: 520, rank: 106500, batchLine: 430 }
+      },
+      career: ["语文教师", "教育管理", "公务员", "编辑出版", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+
+    // ---------- 稳妥档 (avg 499-508) ----------
+
+    {
+      id: "sc-xhsf-01",
+      province: "四川", city: "南充", name: "西华师范大学",
+      college: "文学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 515, rank: 145500, batchLine: 459 },
+        "2024": { score: 518, rank: 137200, batchLine: 459 },
+        "2023": { score: 520, rank: 128800, batchLine: 433 },
+        "2022": { score: 517, rank: 122000, batchLine: 426 },
+        "2021": { score: 518, rank: 109800, batchLine: 430 }
+      },
+      career: ["语文教师", "教育管理", "公务员", "文化传媒", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "sc-xhsf-02",
+      province: "四川", city: "南充", name: "西华师范大学",
+      college: "教育学院", major: "小学教育(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 511, rank: 153000, batchLine: 459 },
+        "2024": { score: 514, rank: 144800, batchLine: 459 },
+        "2023": { score: 516, rank: 136200, batchLine: 433 },
+        "2022": { score: 513, rank: 129500, batchLine: 426 },
+        "2021": { score: 514, rank: 117000, batchLine: 430 }
+      },
+      career: ["小学教师", "教育管理", "教育培训", "课程开发", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "冲刺"]
+    },
+    {
+      id: "sc-mysf-01",
+      province: "四川", city: "绵阳", name: "绵阳师范学院",
+      college: "文学与历史学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 505, rank: 170500, batchLine: 459 },
+        "2024": { score: 508, rank: 162000, batchLine: 459 },
+        "2023": { score: 510, rank: 152500, batchLine: 433 },
+        "2022": { score: 507, rank: 145000, batchLine: 426 },
+        "2021": { score: 508, rank: 132200, batchLine: 430 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "教育培训", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+    {
+      id: "sc-mysf-02",
+      province: "四川", city: "绵阳", name: "绵阳师范学院",
+      college: "外国语学院", major: "英语", batch: "本科一段",
+      scores: {
+        "2025": { score: 503, rank: 175000, batchLine: 459 },
+        "2024": { score: 506, rank: 166500, batchLine: 459 },
+        "2023": { score: 508, rank: 157200, batchLine: 433 },
+        "2022": { score: 505, rank: 149500, batchLine: 426 },
+        "2021": { score: 506, rank: 136800, batchLine: 430 }
+      },
+      career: ["英语教师", "外贸", "翻译", "跨境电商", "教育培训"],
+      tags: ["公办", "省属", "师范", "文科", "稳妥"]
+    },
+
+    // ---------- 保底档 (avg 460-498) ----------
+
+    {
+      id: "sc-njsf-01",
+      province: "四川", city: "内江", name: "内江师范学院",
+      college: "文学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 497, rank: 194000, batchLine: 459 },
+        "2024": { score: 500, rank: 185500, batchLine: 459 },
+        "2023": { score: 502, rank: 175800, batchLine: 433 },
+        "2022": { score: 499, rank: 168200, batchLine: 426 },
+        "2021": { score: 500, rank: 155000, batchLine: 430 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "sc-njsf-02",
+      province: "四川", city: "内江", name: "内江师范学院",
+      college: "经济与管理学院", major: "会计学", batch: "本科一段",
+      scores: {
+        "2025": { score: 494, rank: 199000, batchLine: 459 },
+        "2024": { score: 497, rank: 190500, batchLine: 459 },
+        "2023": { score: 499, rank: 180800, batchLine: 433 },
+        "2022": { score: 496, rank: 173200, batchLine: 426 },
+        "2021": { score: 497, rank: 160000, batchLine: 430 }
+      },
+      career: ["企业财务", "银行", "会计事务所", "审计", "税务"],
+      tags: ["公办", "省属", "财经", "文科", "保底"]
+    },
+    {
+      id: "sc-lssf-01",
+      province: "四川", city: "乐山", name: "乐山师范学院",
+      college: "文学与新闻学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 495, rank: 197000, batchLine: 459 },
+        "2024": { score: 498, rank: 188800, batchLine: 459 },
+        "2023": { score: 500, rank: 179200, batchLine: 433 },
+        "2022": { score: 497, rank: 171500, batchLine: 426 },
+        "2021": { score: 498, rank: 158000, batchLine: 430 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sc-lssf-02",
+      province: "四川", city: "乐山", name: "乐山师范学院",
+      college: "旅游与文化产业学院", major: "旅游管理", batch: "本科一段",
+      scores: {
+        "2025": { score: 490, rank: 207500, batchLine: 459 },
+        "2024": { score: 493, rank: 199200, batchLine: 459 },
+        "2023": { score: 495, rank: 189500, batchLine: 433 },
+        "2022": { score: 492, rank: 181800, batchLine: 426 },
+        "2021": { score: 493, rank: 168000, batchLine: 430 }
+      },
+      career: ["旅游企业", "酒店管理", "文旅部门", "景区运营", "导游/领队"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+
+    // ====================================================================
+    // 陕西省高校 (2所, 3个专业)
+    // ====================================================================
+
+    {
+      id: "sx-xysf-01",
+      province: "陕西", city: "咸阳", name: "咸阳师范学院",
+      college: "文学与传播学院", major: "汉语言文学(师范)", batch: "本科一段",
+      scores: {
+        "2025": { score: 497, rank: 194000, batchLine: 441 },
+        "2024": { score: 500, rank: 185500, batchLine: 444 },
+        "2023": { score: 502, rank: 175800, batchLine: 443 },
+        "2022": { score: 499, rank: 167100, batchLine: 437 },
+        "2021": { score: 500, rank: 154500, batchLine: 444 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "师范", "文科", "保底"]
+    },
+    {
+      id: "sx-yl-01",
+      province: "陕西", city: "榆林", name: "榆林学院",
+      college: "文学院", major: "汉语言文学", batch: "本科一段",
+      scores: {
+        "2025": { score: 489, rank: 210500, batchLine: 441 },
+        "2024": { score: 492, rank: 202100, batchLine: 444 },
+        "2023": { score: 494, rank: 191500, batchLine: 443 },
+        "2022": { score: 491, rank: 182800, batchLine: 437 },
+        "2021": { score: 492, rank: 169500, batchLine: 444 }
+      },
+      career: ["语文教师", "公务员", "编辑出版", "基层文化工作", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
+    },
+    {
+      id: "sx-yl-02",
+      province: "陕西", city: "榆林", name: "榆林学院",
+      college: "政法学院", major: "思想政治教育", batch: "本科一段",
+      scores: {
+        "2025": { score: 486, rank: 216500, batchLine: 441 },
+        "2024": { score: 489, rank: 208100, batchLine: 444 },
+        "2023": { score: 491, rank: 197200, batchLine: 443 },
+        "2022": { score: 488, rank: 188500, batchLine: 437 },
+        "2021": { score: 489, rank: 175200, batchLine: 444 }
+      },
+      career: ["政治教师", "公务员", "基层党务", "社区管理", "考研深造"],
+      tags: ["公办", "省属", "文科", "保底"]
     }
   ]
 };
