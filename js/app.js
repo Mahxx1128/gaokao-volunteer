@@ -2,6 +2,8 @@
  * 高考志愿填报助手 — UI 交互逻辑
  * 依赖: ECharts (echarts), GAOKAO_DATA (window.GAOKAO_DATA), PredictEngine
  */
+console.log('[App] v5 已加载 — 503分文科 · 460~530分档 · 保底/稳妥/冲刺');
+
 var App = {
   chart: null,
   allResults: [],
@@ -115,7 +117,7 @@ var App = {
         var stats = provinceStats[prov];
         var avgProb = stats.sum / stats.count;
         mapData.push({
-          name: prov,
+          name: GAOKAO_DATA.provinceMap[prov] || prov,
           value: Math.round(avgProb),
           avgProb: avgProb,
           schoolCount: stats.count,
@@ -170,8 +172,11 @@ var App = {
     // 点击省份
     this.chart.off('click');
     this.chart.on('click', function(params) {
-      if (params.name && provinceStats[params.name]) {
-        self.selectProvince(params.name);
+      // GeoJSON 全名 → 短名转换
+      var shortName = GAOKAO_DATA.provinceReverseMap[params.name] || params.name;
+      console.log('[App] 点击省份:', params.name, '→ 短名:', shortName, '→ 有数据:', !!provinceStats[shortName]);
+      if (params.name && provinceStats[shortName]) {
+        self.selectProvince(shortName);
       }
     });
   },
@@ -274,12 +279,12 @@ var App = {
         html += '</div>';
         html += '<div class="school-meta">';
         html += '🏫 ' + (s.college || '') + ' | 📚 ' + (s.major || '') + '<br>';
-        html += '📊 预测录取分: <b>' + p.predictedScore + '</b> 分';
-        if (p.detail && p.detail.rankMethod && p.detail.lineDiffMethod) {
-          html += ' (位次法 ' + p.detail.rankMethod.avgScore + '×' + p.detail.rankMethod.count + '年';
-          html += ' + 线差法 ' + p.detail.lineDiffMethod.avgScore + '×' + p.detail.lineDiffMethod.count + '年)';
-        }
+        var gapText = p.gap >= 0 ? '+' + p.gap : '' + p.gap;
+        var gapColor = p.gap >= 5 ? 'var(--green)' : (p.gap >= -5 ? 'var(--yellow)' : 'var(--red)');
+        html += '📊 近5年均分: <b>' + p.avgScore + '</b> 分';
+        html += ' | 差距: <b style="color:' + gapColor + '">' + gapText + '</b>';
         html += '<br>';
+        html += '📈 历年: ' + this.getScoreRange(s) + ' | 📋 ' + (s.batch || '本科');
         html += '📈 近5年: ' + scoreRange + '<br>';
         html += '💼 就业方向:';
         html += '</div>';
